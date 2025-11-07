@@ -10,7 +10,7 @@ jobs:
       issues: write
       pull-requests: write
     steps:
-    - uses: actions/first-interaction@v1
+    - uses: actions/first-interaction@v3
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         issue_message: "Thank you for reporting your first issue to the open-source pyCUFSM project! A maintainer should be along shortly to review your issue."
