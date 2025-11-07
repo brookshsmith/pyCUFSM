@@ -465,11 +465,11 @@ def strip(
         shapes.append(modes_full)
         max_n_modes = max(max_n_modes, n_modes)
 
-    uniform_curve = np.full((max_n_modes, len(lengths)), 0.0)
-    uniform_shapes = np.full((max_n_modes, len(lengths), 4 * len(nodes)), 0.0)
+    uniform_curve = np.full((len(lengths), max_n_modes), 0.0)
+    uniform_shapes = np.full((len(lengths), max_n_modes, 4 * len(nodes)), 0.0)
     for i in range(len(lengths)):
-        uniform_curve[: len(curve[i]), i] = curve[i]
-        uniform_shapes[: len(curve[i]), i, :] = shapes[i].T
+        uniform_curve[i, :max_n_modes] = curve[i]
+        uniform_shapes[i, :max_n_modes, :] = shapes[i].T
 
     return signature, uniform_curve, uniform_shapes
 
