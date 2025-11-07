@@ -1739,7 +1739,7 @@ def meta_elems(nodes: np.ndarray, elements: np.ndarray) -> Tuple[np.ndarray, np.
     # to assign meta-elements to main-nodes
     for i in range(0, n_main_nodes):
         k = 5
-        for j, m_elem in enumerate(meta_elements):  # type: ignore
+        for j, m_elem in enumerate(meta_elements):
             if m_elem[1] == i:
                 if len(main_nodes[0]) <= k:
                     main_nodes = np.c_[main_nodes, np.zeros(n_main_nodes)]
