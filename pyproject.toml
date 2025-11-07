@@ -91,12 +91,13 @@ disable = [
     "missing-module-docstring",
     "too-many-lines",
     "logging-fstring-interpolation",
+    "using-f-string-in-unsupported-version",
 ]
 variable-rgx = '[a-zA-Z_][a-zA-Z0-9_]{2,30}$'
 argument-rgx = '[a-zA-Z_][a-zA-Z0-9_]{2,30}$'
 function-rgx = '[a-zA-Z_][a-zA-Z0-9_]{2,30}$'
 max-line-length = 120
-py-version = 3.8
+py-version = [3.10, 3.11, 3.12, 3.13, 3.14]
 
 [tool.mypy]
 packages = "pycufsm"
@@ -108,4 +109,4 @@ exclude = ['gui_widgets\.py']
 
 [tool.black]
 line-length = 120
-target-version = ['py310', 'py311', 'py312']
+target-version = ['py310', 'py311', 'py312', 'py313']
