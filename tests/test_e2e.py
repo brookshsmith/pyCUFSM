@@ -159,7 +159,7 @@ def describe_end_to_end_tests():
             assert signature[lengths.index(expected["xcrd"])] == approx(expected["Mcrd"], abs=0.01)
 
         def it_results_in_correct_signature_curve():
-            assert np.allclose(expected_curve[:len(curve), 1, 0], curve[:, 0], atol=1.0e-4)
+            assert np.allclose(expected_curve[: len(curve), 1, 0], curve[:, 0], atol=1.0e-4)
 
     def context_dsm_3_2_5_z_with_lips_P():
         @pspec_context("DSM Guide Jan 2006, Ex 3.2.2: Z-Section with Lips (P)")
@@ -221,7 +221,7 @@ def describe_end_to_end_tests():
             assert signature[lengths.index(expected["xcrd"])] == approx(expected["Mcrd"], abs=0.01)
 
         def it_results_in_correct_signature_curve():
-            assert np.allclose(expected_curve[:len(curve), 1, 0], curve[:, 0], atol=1.0e-4)
+            assert np.allclose(expected_curve[: len(curve), 1, 0], curve[:, 0], atol=1.0e-4)
 
     def context_dsm_3_2_11_rack_post_Mz():
         @pspec_context("DSM Guide Jan 2006, Ex 3.2.11: Rack post section (Mz)")
@@ -242,7 +242,7 @@ def describe_end_to_end_tests():
             assert signature[lengths.index(expected["xcrd"])] == approx(expected["Mcrd"], abs=0.01)
 
         def it_results_in_correct_signature_curve():
-            assert np.allclose(expected_curve[:len(curve), 1, 0], curve[:, 0], atol=1.0e-4)
+            assert np.allclose(expected_curve[: len(curve), 1, 0], curve[:, 0], atol=1.0e-4)
 
     def context_dsm_3_2_11_rack_post_P():
         @pspec_context("DSM Guide Jan 2006, Ex 3.2.11: Rack post section (P)")
