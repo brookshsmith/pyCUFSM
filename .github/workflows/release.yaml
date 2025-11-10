@@ -28,7 +28,7 @@ jobs:
         run: poetry build -f sdist
       
       - name: Upload Source Distribution
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: cibw-sdist
           path: dist/*.tar.gz
@@ -67,7 +67,7 @@ jobs:
         with:
           output-dir: dist
         
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: cibw-wheels-${{ matrix.python }}-${{ matrix.buildplat[1] }}
           path: ./dist/*.whl
