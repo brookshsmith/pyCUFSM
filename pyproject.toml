@@ -56,7 +56,7 @@ typing_extensions = { version = "==4.15.0", python = "<3.12" }
 ipywidgets = "==8.1.8"
 
 [tool.poetry.group.test.dependencies]
-pylint = "==3.3.7"
+pylint = "==4.0.2"
 mypy = "==1.18.2"
 black = { version = "==25.9.0", extras = ["jupyter"] }
 pytest = "==8.4.2"
