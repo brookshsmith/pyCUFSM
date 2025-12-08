@@ -9,7 +9,7 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - name: Checkout pyCUFSM Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install Poetry
         run: pipx install poetry
@@ -57,7 +57,7 @@ jobs:
           platforms: arm64
 
       - name: Checkout pyCUFSM Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.2.1
@@ -80,7 +80,7 @@ jobs:
       matrix:
         python-version: ["3.10"]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Install Poetry
         run: pipx install poetry
       - name: Set up Python ${{ matrix.python-version }}
