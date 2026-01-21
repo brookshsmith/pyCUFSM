@@ -9,7 +9,7 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - name: Checkout pyCUFSM Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install Poetry
         run: pipx install poetry
@@ -28,7 +28,7 @@ jobs:
         run: poetry build -f sdist
       
       - name: Upload Source Distribution
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: cibw-sdist
           path: dist/*.tar.gz
@@ -57,17 +57,17 @@ jobs:
           platforms: arm64
 
       - name: Checkout pyCUFSM Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v3.2.1
+        uses: pypa/cibuildwheel@v3.3.0
         env:
           CIBW_BUILD: "${{ matrix.python }}-${{ matrix.buildplat[1] }}"
           CIBW_ARCHS: "${{ matrix.buildplat[2] }}"
         with:
           output-dir: dist
         
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: cibw-wheels-${{ matrix.python }}-${{ matrix.buildplat[1] }}
           path: ./dist/*.whl
@@ -80,7 +80,7 @@ jobs:
       matrix:
         python-version: ["3.10"]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Install Poetry
         run: pipx install poetry
       - name: Set up Python ${{ matrix.python-version }}
@@ -114,7 +114,7 @@ jobs:
 
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           pattern: cibw-*
           path: dist
