@@ -3,15 +3,17 @@ from typing import Literal, Optional
 
 import numpy as np
 
+from pycufsm.types import ArrayLike
+
 ANGLE_TOLERANCE = np.radians(5)  # Tolerance for detecting a corner in radians
 
 
 def mesh_nodes(
-    centerline_coords: np.ndarray,
+    centerline_coords: ArrayLike,
     corner_radius: float,
     mesh_corner_deg: Optional[float] = 22.5,
     mesh_side_len: Optional[float] = 0.0,
-):
+) -> np.ndarray:
     """
     Convert centerline coordinates to node coordinates for a cross-section. Note that all meshing parameters are
     interpreted as maximum values; meshing will always be performed evenly over each curved or straight segment.
@@ -35,7 +37,9 @@ def mesh_nodes(
     """
     # Initialize parameters
     centerline_coords = np.array(centerline_coords)
-    mesh_corner_rad = mesh_corner_deg * np.pi / 180  # Convert mesh corner angle from degrees to radians
+    mesh_corner_rad = (
+        mesh_corner_deg * np.pi / 180 if mesh_corner_deg is not None else None
+    )  # Convert mesh corner angle from degrees to radians
     if mesh_side_len is not None and mesh_side_len <= 0.0:
         # Default mesh side length to the maximum outer dimension divided by 4
         max_dim = np.max(np.ptp(centerline_coords, axis=0))
@@ -104,7 +108,7 @@ def c_section(
     r_inner: float = 0.0,
     mesh_corner_deg: Optional[float] = 22.5,
     mesh_side_len: Optional[float] = 0.0,
-):
+) -> np.ndarray:
     """
     Convert cross-section outer dimensions of a "C" section to meshed nodes.
 
@@ -174,7 +178,7 @@ def z_section(
     r_inner: float = 0.0,
     mesh_corner_deg: Optional[float] = 22.5,
     mesh_side_len: Optional[float] = 0.0,
-):
+) -> np.ndarray:
     """
     Convert cross-section outer dimensions of a "Z" section to centerline coordinates. This function does not mesh
     the cross-section, and does not account for corner radii. If these are needed, run this function's output through
@@ -245,7 +249,7 @@ def f_section(
     r_inner: float = 0.0,
     mesh_corner_deg: Optional[float] = 22.5,
     mesh_side_len: Optional[float] = 0.0,
-):
+) -> np.ndarray:
     """
     Convert cross-section outer dimensions of a "F" section to centerline coordinates. This function does not mesh
     the cross-section, and does not account for corner radii. If these are needed, run this function's output through
@@ -337,8 +341,8 @@ def _sfia_thickness_and_radius(designation: int, thickness_type: Literal["minimu
         raise ValueError(f"Designation {int(designation)} not found in thickness table.")
 
     row = thickness_table[int(designation)]
-    t = row["t_min"] if thickness_type == "minimum" else row["t_design"]
-    r = row["r_inner"] + t / 2  # Convert inner radius to centerline radius
+    t: float = row["t_min"] if thickness_type == "minimum" else row["t_design"]
+    r: float = row["r_inner"] + t / 2  # Convert inner radius to centerline radius
     row["t"] = t
     row["r"] = r
     return row
@@ -390,7 +394,7 @@ def sfia_section(
     try:
         depth, section_type, flange_width, thickness_mils = re.match(
             r"(\d+)([STUFCZ])(\d+)-(\d+)", designation
-        ).groups()
+        ).groups()  # type: ignore  (this is a type failure because the regex match could fail, but we catch that with the except block below)
     except AttributeError as exc:
         raise ValueError(f"Invalid SFIA designation format: '{designation}'.") from exc
 
