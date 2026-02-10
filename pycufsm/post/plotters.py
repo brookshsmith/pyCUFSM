@@ -453,12 +453,13 @@ def thecurve3(
 
 
 def simple_cross_sect(nodes: np.ndarray) -> None:
-    """Simple cross section plotter for debugging or quick previews. Assumes that nodes are all in order and continuously connected.
+    """Simple cross section plotter for debugging or quick previews. Assumes that nodes are all in order
+    and continuously connected.
 
     Args:
         nodes (np.ndarray): Array of nodes with columns [x z ...]
     """
-    _, ax1 = plt.subplots(constrained_layout=True, figsize=(6, 6))
+    plt.subplots(constrained_layout=True, figsize=(6, 6))
     plt.plot(nodes[:, 0], nodes[:, 1], "bo-", markersize=2)
     plt.gca().set_aspect("equal", adjustable="box")
     plt.show()
