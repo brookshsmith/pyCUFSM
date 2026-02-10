@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Polygon
 
-from pycufsm import helpers
+import pycufsm.post.helpers as helpers
 from pycufsm.analysis import analysis
 
 

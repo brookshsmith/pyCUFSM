@@ -4,10 +4,10 @@ from typing import Dict, Literal, Optional, Sequence, Tuple, Union
 import numpy as np
 from scipy import linalg as spla  # type: ignore
 
-import pycufsm.cfsm
-from pycufsm.analysis import analysis
+import pycufsm.pre.forces as forces
+import pycufsm.solve.cfsm as cfsm
 from pycufsm.helpers import inputs_new_to_old, lengths_recommend
-from pycufsm.preprocess import stress_gen, yield_mp
+from pycufsm.solve.analysis import analysis
 from pycufsm.types import (
     BC,
     Analysis_Config,
@@ -181,15 +181,15 @@ def strip(
             n_dist_modes,
             n_local_modes,
             dof_perm,
-        ] = pycufsm.cfsm.base_properties(nodes=nodes_base, elements=elements)
-        [r_x, r_z, r_yd, r_ys, r_ud] = pycufsm.cfsm.mode_constr(
+        ] = cfsm.base_properties(nodes=nodes_base, elements=elements)
+        [r_x, r_z, r_yd, r_ys, r_ud] = cfsm.mode_constr(
             nodes=nodes_base,
             elements=elements,
             node_props=node_props,
             main_nodes=main_nodes,
             meta_elements=meta_elements,
         )
-        [d_y, n_global_modes] = pycufsm.cfsm.y_dofs(
+        [d_y, n_global_modes] = cfsm.y_dofs(
             nodes=nodes_base,
             elements=elements,
             main_nodes=main_nodes,
@@ -215,7 +215,7 @@ def strip(
         # SET SWITCH AND PREPARE BASE VECTORS (R_matrix) FOR cFSM ANALYSIS
         if cfsm_analysis == 1:
             # generate natural base vectors for axial compression loading
-            b_v_l = pycufsm.cfsm.base_column(
+            b_v_l = cfsm.base_column(
                 nodes_base=nodes_base,
                 elements=elements,
                 props=props,
@@ -294,7 +294,7 @@ def strip(
             # size boundary conditions and user constraints for use in R_matrix format
             # d_constrained=r_user*d_unconstrained, d=nodal DOF vector (note by
             # BWS June 5 2006)
-            r_user = pycufsm.cfsm.constr_user(nodes=nodes, constraints=constraints, m_a=m_a)
+            r_user = cfsm.constr_user(nodes=nodes, constraints=constraints, m_a=m_a)
             R_u0_matrix = spla.null_space(r_user.conj().T)
             # Number of boundary conditions and user defined constraints = nu0
             nu0 = len(R_u0_matrix[0])
@@ -302,7 +302,7 @@ def strip(
         # GENERATION OF cFSM CONSTRAINT MATRIX
         if cfsm_analysis == 1:
             # PERFORM ORTHOGONALIZATION IF GBT-LIKE MODES ARE ENFORCED
-            b_v = pycufsm.cfsm.base_update(
+            b_v = cfsm.base_update(
                 GBT_con=GBT_con,
                 b_v_l=b_v_l,
                 length=length,
@@ -318,7 +318,7 @@ def strip(
             )
             # no normalization is enforced: 0:  m
             # assign base vectors to constraints
-            b_v = pycufsm.cfsm.mode_select(
+            b_v = cfsm.mode_select(
                 b_v=b_v,
                 n_global_modes=n_global_modes,
                 n_dist_modes=n_dist_modes,
@@ -704,7 +704,9 @@ def strip_new(
     if forces is None and yield_force is not None:
         restrained = yield_force["restrain"] if "restrain" in yield_force else False
         offset = yield_force["offset"] if "offset" in yield_force and yield_force["offset"] is not None else [0, 0]
-        all_yields = yield_mp(nodes=nodes_old, f_y=yield_force["f_y"], sect_props=sect_props, restrained=restrained)
+        all_yields = forces.yield_mp(
+            nodes=nodes_old, f_y=yield_force["f_y"], sect_props=sect_props, restrained=restrained
+        )
         forces = {"Mxx": 0, "Myy": 0, "M11": 0, "M22": 0, "P": 0, "restrain": restrained, "offset": offset}
         if yield_force["direction"] == "-" or yield_force["direction"] == "Neg":
             multiplier = -1
@@ -718,7 +720,7 @@ def strip_new(
             "Either 'forces' or 'yield_force' must be set, " + "or stress must be set manually for each node"
         )
     if forces is not None:
-        nodes_stressed = stress_gen(nodes=nodes_old, forces=forces, sect_props=sect_props)
+        nodes_stressed = forces.stress_gen(nodes=nodes_old, forces=forces, sect_props=sect_props)
     elif np.shape(nodes)[1] == 3:
         nodes_stressed = nodes_old
     else:
@@ -866,7 +868,7 @@ def m_recommend(
         if load2 < load1 and load2 <= load3:
             local_minima.append(curve_signature[i + 1, 0])
 
-    _, _, _, _, _, _, n_dist_modes, n_local_modes, _ = pycufsm.cfsm.base_properties(nodes=nodes, elements=elements)
+    _, _, _, _, _, _, n_dist_modes, n_local_modes, _ = cfsm.base_properties(nodes=nodes, elements=elements)
 
     n_global_modes = 4
     n_other_modes = 2 * (len(nodes) - 1)

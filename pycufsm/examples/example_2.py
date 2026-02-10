@@ -3,7 +3,7 @@ from typing import Dict
 import numpy as np
 
 from pycufsm.fsm import strip
-from pycufsm.preprocess import stress_gen
+from pycufsm.pre.forces import stress_gen
 from pycufsm.types import BC, GBT_Con, Sect_Props
 
 # This example presents a very simple Zed section,

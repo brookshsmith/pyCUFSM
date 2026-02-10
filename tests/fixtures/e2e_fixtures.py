@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from pycufsm import fsm, helpers, preprocess
+from pycufsm import fsm
 
 # import pycufsm.examples.example_1 as ex1_main
 
@@ -187,7 +187,7 @@ def offset_basis(thickness):
 
 @pytest.fixture
 def stress_gen(nodes, forces, sect_props, offset_basis):
-    return preprocess.stress_gen(nodes=nodes, forces=forces, sect_props=sect_props, offset_basis=offset_basis)
+    return forces.stress_gen(nodes=nodes, forces=forces, sect_props=sect_props, offset_basis=offset_basis)
 
 
 @pytest.fixture
