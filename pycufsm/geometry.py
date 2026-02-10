@@ -394,7 +394,8 @@ def sfia_section(
     try:
         depth, section_type, flange_width, thickness_mils = re.match(
             r"(\d+)([STUFCZ])(\d+)-(\d+)", designation
-        ).groups()  # type: ignore  (this is a type failure because the regex match could fail, but we catch that with the except block below)
+        ).groups()  # type: ignore
+        # The above is a type failure because the regex match could fail, but we catch that with the except block below
     except AttributeError as exc:
         raise ValueError(f"Invalid SFIA designation format: '{designation}'.") from exc
 
