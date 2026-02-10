@@ -4,7 +4,8 @@ from pytest import approx, raises
 
 import pycufsm.examples.example_1 as example_1
 import pycufsm.examples.example_1_new as example_1_new
-from pycufsm import cutwp, fsm, helpers
+from pycufsm import fsm, helpers
+from pycufsm.pre import cutwp
 
 from .fixtures.e2e_fixtures import *
 from .utils import pspec_context

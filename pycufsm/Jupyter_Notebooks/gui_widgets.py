@@ -3,7 +3,7 @@ from typing import List, Tuple
 import ipywidgets as widgets
 import numpy as np
 
-import pycufsm.plotters as crossect
+import pycufsm.post.plotters as plotters
 
 
 def prevals() -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, List[int]]:
@@ -255,7 +255,6 @@ class Preprocess:
         self.page.close()
         del self.page
         self.page = widgets.VBox([self.row0, self.row, self.relem])
-        display(self.page)
 
     def add_material(self, b):
         self.m = self.m + 1
@@ -270,7 +269,7 @@ class Preprocess:
         self.rowm, self.ADDMAT, self.DELMAT, self.mitems = self.wprops(self.props, self.m)
         self.cs = widgets.Output()
         with self.cs:
-            crossect.crossect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
+            plotters.cross_sect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
         self.Assemble(self.page, self.rowm, self.rnode, self.relem, self.rflag, self.cs, self.rBC)
 
     def del_material(self, b):
@@ -283,7 +282,7 @@ class Preprocess:
         self.rowm, self.ADDMAT, self.DELMAT, self.mitems = self.wprops(self.props, self.m)
         self.cs = widgets.Output()
         with self.cs:
-            crossect.crossect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
+            plotters.cross_sect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
         self.Assemble(self.page, self.rowm, self.rnode, self.relem, self.rflag, self.cs, self.rBC)
 
     def add_node(self, b):
@@ -299,7 +298,7 @@ class Preprocess:
         self.rnode, self.ADDNODE, self.DELNODE, self.nitems = self.wnodes(self.nodes, self.n)
         self.cs = widgets.Output()
         with self.cs:
-            crossect.crossect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
+            plotters.cross_sect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
         self.Assemble(self.page, self.rowm, self.rnode, self.relem, self.rflag, self.cs, self.rBC)
 
     def del_node(self, b):
@@ -314,7 +313,7 @@ class Preprocess:
         self.rnode, self.ADDNODE, self.DELNODE, self.nitems = self.wnodes(self.nodes, self.n)
         self.cs = widgets.Output()
         with self.cs:
-            crossect.crossect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
+            plotters.cross_sect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
         self.Assemble(self.page, self.rowm, self.rnode, self.relem, self.rflag, self.cs, self.rBC)
 
     def add_elem(self, b):
@@ -330,7 +329,7 @@ class Preprocess:
         self.relem, self.ADDELEM, self.DELELEM, self.eitems = self.welems(self.elements, self.e)
         self.cs = widgets.Output()
         with self.cs:
-            crossect.crossect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
+            plotters.cross_sect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
         self.Assemble(self.page, self.rowm, self.rnode, self.relem, self.rflag, self.cs, self.rBC)
 
     def del_elem(self, b):
@@ -343,7 +342,7 @@ class Preprocess:
         self.relem, self.ADDELEM, self.DELELEM, self.eitems = self.welems(self.elements, self.e)
         self.cs = widgets.Output()
         with self.cs:
-            crossect.crossect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
+            plotters.cross_sect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
         self.Assemble(self.page, self.rowm, self.rnode, self.relem, self.rflag, self.cs, self.rBC)
 
     def submit(self, b):
@@ -371,7 +370,7 @@ class Preprocess:
         self.rflag, self.Submit, self.flags = self.wflag(self.flag)
         self.cs = widgets.Output()
         with self.cs:
-            crossect.crossect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
+            plotters.cross_sect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
         self.Assemble(self.page, self.rowm, self.rnode, self.relem, self.rflag, self.cs, self.rBC)
 
     def run(self, m, n, e, props, nodes, elements, springs, constraints, flag):
@@ -391,7 +390,7 @@ class Preprocess:
         self.rBC, self.bc_widget, self.neigs = self.wBound_Cond()
         self.cs = widgets.Output()
         with self.cs:
-            crossect.crossect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
+            plotters.cross_sect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
         self.page = widgets.FloatText(value=1)
         self.Assemble(self.page, self.rowm, self.rnode, self.relem, self.rflag, self.cs, self.rBC)
         return self.props, self.nodes, self.elements
