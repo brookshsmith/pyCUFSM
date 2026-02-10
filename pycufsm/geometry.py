@@ -325,16 +325,16 @@ def _sfia_thickness_and_radius(designation: int, thickness_type: Literal["minimu
 
     # Source = January 2026 SFIA "Technical Guide for Cold-Formed Steel Framing Products"
     # https://www.cfsteel.org/sfia-technical-publications
-    thickness_table = {
-        18: {"t_min": 0.0179, "t_design": 0.0188, "r_inner": 0.0844, "reference_gauge": "25"},
-        27: {"t_min": 0.0269, "t_design": 0.0283, "r_inner": 0.0796, "reference_gauge": "22"},
-        30: {"t_min": 0.0296, "t_design": 0.0312, "r_inner": 0.0782, "reference_gauge": "20-Drywall"},
-        33: {"t_min": 0.0329, "t_design": 0.0346, "r_inner": 0.0765, "reference_gauge": "20-Structural"},
-        43: {"t_min": 0.0428, "t_design": 0.0451, "r_inner": 0.0712, "reference_gauge": "18"},
-        54: {"t_min": 0.0538, "t_design": 0.0566, "r_inner": 0.0849, "reference_gauge": "16"},
-        68: {"t_min": 0.0677, "t_design": 0.0713, "r_inner": 0.1070, "reference_gauge": "14"},
-        97: {"t_min": 0.0966, "t_design": 0.1017, "r_inner": 0.1526, "reference_gauge": "12"},
-        118: {"t_min": 0.1180, "t_design": 0.1242, "r_inner": 0.1841, "reference_gauge": "10"},
+    thickness_table: dict[int, dict[str, float]] = {
+        18: {"t_min": 0.0179, "t_design": 0.0188, "r_inner": 0.0844, "reference_gauge": 25},
+        27: {"t_min": 0.0269, "t_design": 0.0283, "r_inner": 0.0796, "reference_gauge": 22},
+        30: {"t_min": 0.0296, "t_design": 0.0312, "r_inner": 0.0782, "reference_gauge": 20},  # Drywall
+        33: {"t_min": 0.0329, "t_design": 0.0346, "r_inner": 0.0765, "reference_gauge": 20},  # Structural
+        43: {"t_min": 0.0428, "t_design": 0.0451, "r_inner": 0.0712, "reference_gauge": 18},
+        54: {"t_min": 0.0538, "t_design": 0.0566, "r_inner": 0.0849, "reference_gauge": 16},
+        68: {"t_min": 0.0677, "t_design": 0.0713, "r_inner": 0.1070, "reference_gauge": 14},
+        97: {"t_min": 0.0966, "t_design": 0.1017, "r_inner": 0.1526, "reference_gauge": 12},
+        118: {"t_min": 0.1180, "t_design": 0.1242, "r_inner": 0.1841, "reference_gauge": 10},
     }
 
     if int(designation) not in thickness_table:
