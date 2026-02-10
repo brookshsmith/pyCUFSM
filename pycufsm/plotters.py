@@ -9,7 +9,7 @@ from pycufsm import helpers
 from pycufsm.analysis import analysis
 
 
-def crossect(
+def cross_sect(
     nodes: np.ndarray,
     elements: np.ndarray,
     springs: np.ndarray,  # pylint: disable=unused-argument
@@ -450,3 +450,16 @@ def thecurve3(
     plt.title("Buckling curve")
     plt.show()
     # set the callback of curve
+
+
+def simple_cross_sect(nodes: np.ndarray) -> None:
+    """Simple cross section plotter for debugging or quick previews. Assumes that nodes are all in order
+    and continuously connected.
+
+    Args:
+        nodes (np.ndarray): Array of nodes with columns [x z ...]
+    """
+    plt.subplots(constrained_layout=True, figsize=(6, 6))
+    plt.plot(nodes[:, 0], nodes[:, 1], "bo-", markersize=2)
+    plt.gca().set_aspect("equal", adjustable="box")
+    plt.show()
