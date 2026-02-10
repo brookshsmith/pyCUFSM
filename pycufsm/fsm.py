@@ -478,15 +478,15 @@ def strip_new(
     props: Dict[str, Dict[str, float]],
     nodes: ArrayLike,
     elements: Sequence[New_Element],
-    sect_props: Sect_Props,
+    yield_force: Optional[Yield_Force] = None,
+    forces: Optional[Forces] = None,
+    sect_props: Optional[Sect_Props] = None,
     lengths: Optional[Union[ArrayLike, set, Dict[float, ArrayLike]]] = None,
     node_props: Optional[Dict[Union[Literal["all"], int], New_Node_Props]] = None,
     springs: Optional[Sequence[New_Spring]] = None,
     constraints: Optional[Sequence[New_Constraint]] = None,
     analysis_config: Optional[Analysis_Config] = None,
     cfsm_config: Optional[Cfsm_Config] = None,
-    forces: Optional[Forces] = None,
-    yield_force: Optional[Yield_Force] = None,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Converts new format of inputs to old (original CUFSM) format
 
@@ -517,7 +517,45 @@ def strip_new(
                 Material thickness
             elements["mat"]:
                 material name as a string
-        sect_props (Sect_Props): Section properties
+        yield_force (Optional[Yield_Force]): Single yield force to apply to section.
+            | {
+            |    force: "Mxx"|"Myy"|"M11"|"M22"|"P",
+            |    direction: "Pos"|"Neg"|"+"|"-",
+            |    f_y: float,
+            |    restrain: bool,
+            |    offset: ArrayLike
+            | }
+            Either this or 'forces' must be set, or stresses must be set manually in `nodes`.
+            yield_force["restrain"]:
+                Note that 'restrain' only affects "Mxx" or "Myy" forces, and then only for sections
+                in which the principal axes are no aligned with the geometric axes (such as Z
+                sections)
+            yield_force["offset"]:
+                | `[x_offset, y_offset]`
+                Offset from the (0,0) coordinate used in calculating section properties and the
+                (0,0) coordinate used to define the nodal coordinates. This may commonly differ
+                by thickness/2, for example, if an external section properties calculator is used
+        forces (Optional[Forces]): Specific forces to apply to the section.
+            | {
+            |    'P': float,
+            |    'Mxx': float,
+            |    'Myy': float,
+            |    'M11': float,
+            |    'M22': float,
+            |    'restrain': bool,
+            |    'offset': ArrayLike
+            | }
+            forces["restrain"]:
+                Note that 'restrain' only affects "Mxx" or "Myy" forces, and then only for sections
+                in which the principal axes are no aligned with the geometric axes (such as Z
+                sections)
+            forces["offset"]:
+                | `[x_offset, y_offset]`
+                Offset from the (0,0) coordinate used in calculating section properties and the
+                (0,0) coordinate used to define the nodal coordinates. This may commonly differ
+                by thickness/2, for example, if an external section properties calculator is used
+            Either this or 'yield_force' must be set, or stresses must be set manually in `nodes`.
+        sect_props (Optional[Sect_Props]): Section properties
             | {
             |   "A": float,
             |   "cx": float,
@@ -536,15 +574,18 @@ def strip_new(
             |   "B2": float,
             |   "wn": np.ndarray
             | }
-            Dictionary of section properties of cross-section
-        lengths (Union[ArrayLike, set, Dict[float, ArrayLike]): Half-wavelengths for analysis
+            Dictionary of section properties of cross-section. If None, section properties will be calculated using
+            the included CUTWP based on the geometry defined by `nodes` and `elements`, and the material properties
+            defined in `props`.
+        lengths (Optional[Union[ArrayLike, set, Dict[float, ArrayLike]]]): Half-wavelengths for analysis
             | `[length1, length2, ...]`
             | or
             | `{length1: List[int], length2: List[int], ...}
             If given as a simple array, then the longitudinal m term will be taken as `[1]` for each
             half-wavelength (which is normally what you want for a signature curve analysis). If
             given as a dictionary, then the longitudinal m terms must be set to an array with
-            appropriate values
+            appropriate values. If None, then lengths will be taken as the recommended lengths based on
+            the geometry of the section, and the longitudinal m terms will be taken as `[1]` for each length.
         node_props (Optional[Dict[Union[Literal["all", int], New_Node_Props]]): Nodal DOF inclusion
             | {
             |    node_#|"all": {
@@ -621,44 +662,7 @@ def strip_new(
                 | "natural": natural basis
                 | "modal_axial": modal basis, axial orthogonality
                 | "modal_load": modal basis, load dependent orthogonality
-        yield_force (Optional[Yield_Force]): Single yield force to apply to section.
-            | {
-            |    force: "Mxx"|"Myy"|"M11"|"M22"|"P",
-            |    direction: "Pos"|"Neg"|"+"|"-",
-            |    f_y: float,
-            |    restrain: bool,
-            |    offset: ArrayLike
-            | }
-            Either this or 'forces' must be set, or stresses must be set manually in `nodes`.
-            yield_force["restrain"]:
-                Note that 'restrain' only affects "Mxx" or "Myy" forces, and then only for sections
-                in which the principal axes are no aligned with the geometric axes (such as Z
-                sections)
-            yield_force["offset"]:
-                | `[x_offset, y_offset]`
-                Offset from the (0,0) coordinate used in calculating section properties and the
-                (0,0) coordinate used to define the nodal coordinates. This may commonly differ
-                by thickness/2, for example, if an external section properties calculator is used
-        forces (Optional[Forces]): Specific forces to apply to the section.
-            | {
-            |    'P': float,
-            |    'Mxx': float,
-            |    'Myy': float,
-            |    'M11': float,
-            |    'M22': float,
-            |    'restrain': bool,
-            |    'offset': ArrayLike
-            | }
-            forces["restrain"]:
-                Note that 'restrain' only affects "Mxx" or "Myy" forces, and then only for sections
-                in which the principal axes are no aligned with the geometric axes (such as Z
-                sections)
-            forces["offset"]:
-                | `[x_offset, y_offset]`
-                Offset from the (0,0) coordinate used in calculating section properties and the
-                (0,0) coordinate used to define the nodal coordinates. This may commonly differ
-                by thickness/2, for example, if an external section properties calculator is used
-            Either this or 'yield_force' must be set, or stresses must be set manually in `nodes`.
+
 
 
     Returns:
