@@ -8,7 +8,7 @@ ANGLE_TOLERANCE = np.radians(5)  # Tolerance for detecting a corner in radians
 
 def mesh_nodes(
     centerline_coords: np.ndarray,
-    corner_radius_deg: float,
+    corner_radius: float,
     mesh_corner_deg: Optional[float] = 22.5,
     mesh_side_len: Optional[float] = 0.0,
 ):
@@ -27,7 +27,6 @@ def mesh_nodes(
     """
     # Initialize parameters
     centerline_coords = np.array(centerline_coords)
-    corner_radius = corner_radius_deg * np.pi / 180  # Convert corner radius from degrees to radians
     mesh_corner_rad = mesh_corner_deg * np.pi / 180  # Convert mesh corner angle from degrees to radians
     if mesh_side_len is not None and mesh_side_len <= 0.0:
         # Default mesh side length to the maximum outer dimension divided by 4
@@ -42,6 +41,10 @@ def mesh_nodes(
         prev_angle = np.arctan2(curr_pt[1] - prev_pt[1], curr_pt[0] - prev_pt[0])
         next_angle = np.arctan2(next_pt[1] - curr_pt[1], next_pt[0] - curr_pt[0])
         corner_angle = next_angle - prev_angle
+        if corner_angle > np.pi:
+            corner_angle -= 2 * np.pi
+        elif corner_angle < -np.pi:
+            corner_angle += 2 * np.pi
         corner_offset = 0.0
         if np.abs(corner_angle) > ANGLE_TOLERANCE:
             corner_offset = np.abs(corner_radius / np.tan(corner_angle / 2))
@@ -49,16 +52,19 @@ def mesh_nodes(
         # Add straight segment before corner
         prev_length = np.sqrt((curr_pt[0] - prev_pt[0]) ** 2 + (curr_pt[1] - prev_pt[1]) ** 2) - corner_offset
         num_segments = int(np.ceil(prev_length / mesh_side_len)) if mesh_side_len else 1
-        dx = (curr_pt[0] - prev_pt[0]) / num_segments
-        dy = (curr_pt[1] - prev_pt[1]) / num_segments
+        dx = np.cos(prev_angle) * prev_length / num_segments
+        dy = np.sin(prev_angle) * prev_length / num_segments
         for i in range(1, num_segments + 1):
             nodes.append([prev_pt[0] + i * dx, prev_pt[1] + i * dy])
+
+        # Update current point to the last node added, which will be the start of the corner arc if a corner is present
+        curr_pt = nodes[-1]
 
         # Add corner arc if needed
         if corner_offset > 0.0:
             centroid_x = curr_pt[0] + corner_radius * np.cos(prev_angle + np.sign(corner_angle) * np.pi / 2)
             centroid_y = curr_pt[1] + corner_radius * np.sin(prev_angle + np.sign(corner_angle) * np.pi / 2)
-            start_angle = prev_angle - np.pi / 2
+            start_angle = prev_angle - np.sign(corner_angle) * np.pi / 2
             num_segments = int(np.ceil(np.abs(corner_angle) / mesh_corner_rad)) if mesh_corner_rad else 1
             for i in range(1, num_segments + 1):
                 theta = start_angle + i * (corner_angle / num_segments)
@@ -139,7 +145,7 @@ def c_section(
 
     return mesh_nodes(
         centerline_coords=coords,
-        corner_radius_deg=r_inner + t / 2,
+        corner_radius=r_inner + t / 2,
         mesh_corner_deg=mesh_corner_deg,
         mesh_side_len=mesh_side_len,
     )
@@ -203,7 +209,7 @@ def z_section(
 
     return mesh_nodes(
         centerline_coords=coords,
-        corner_radius_deg=r_inner + t / 2,
+        corner_radius=r_inner + t / 2,
         mesh_corner_deg=mesh_corner_deg,
         mesh_side_len=mesh_side_len,
     )
@@ -252,7 +258,7 @@ def f_section(
 
     return mesh_nodes(
         centerline_coords=coords,
-        corner_radius_deg=r_inner + t / 2,
+        corner_radius=r_inner + t / 2,
         mesh_corner_deg=mesh_corner_deg,
         mesh_side_len=mesh_side_len,
     )
@@ -373,6 +379,11 @@ def sfia_section(
         l = _sfia_lip_length(int(flange_width))
     elif section_type == "F":
         l = 0.500
+
+    print(
+        f"Creating SFIA section with designation '{designation}': "
+        f"depth={d:.3f} in, flange_width={b:.3f} in, thickness={t:.4f} in, lip_length={l:.3f} in, inner_radius={r_inner:.4f} in"
+    )
 
     if section_type in ["S", "T", "U", "C"]:
         return c_section(
