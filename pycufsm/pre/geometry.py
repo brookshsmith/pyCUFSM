@@ -15,13 +15,21 @@ def mesh_nodes(
     mesh_side_len: Optional[float] = 0.0,
 ):
     """
-    Convert centerline coordinates to node coordinates for a cross-section. Note that all meshing parameters are interpreted as maximum values; meshing will always be performed evenly over each curved or straight segment. For example, if a straight segment is 100mm long and the mesh side length is set to 30mm, the actual mesh side length will be 25mm to ensure an even distribution of nodes.
+    Convert centerline coordinates to node coordinates for a cross-section. Note that all meshing parameters are
+    interpreted as maximum values; meshing will always be performed evenly over each curved or straight segment.
+    For example, if a straight segment is 100mm long and the mesh side length is set to 30mm, the actual mesh side
+    length will be 25mm to ensure an even distribution of nodes.
 
     Args:
-        centerline_coords (array_like): An (N, 2) array of (x, y) coordinates along the centerline of the cross-section.
+        centerline_coords (array_like): An (N, 2) array of (x, y) coordinates along the centerline of the
+            cross-section.
         corner_radius (float): The radius of the corners of the cross-section.
-        mesh_corner_deg (float, optional): The angle in degrees for meshing the corners. Defaults to 22.5 degrees. If None, corners will appear as though chamfered, with two points representing the start and end of the corner arc only.
-        mesh_side_len (float, optional): The desired length of the mesh elements along the sides. Defaults to 0.0, and if set to this, it will be configured to a quarter of the maximum outer dimension. If None, no meshing will be performed.
+        mesh_corner_deg (float, optional): The angle in degrees for meshing the corners. Defaults to 22.5 degrees.
+            If None, corners will appear as though chamfered, with two points representing the start and end of the
+            corner arc only.
+        mesh_side_len (float, optional): The desired length of the mesh elements along the sides. Defaults to 0.0,
+            and if set to this, it will be configured to a quarter of the maximum outer dimension. If None, no meshing
+            will be performed.
 
     Returns:
         np.ndarray: An (M, 2) array of (x, y) coordinates for the nodes of the cross-section.
@@ -78,7 +86,7 @@ def mesh_nodes(
         prev_pt = nodes[-1]  # Which will equal curr_pt if no corner was added, else the last arc point added
 
     # Add final straight segment
-    final_pt = next_pt
+    final_pt = centerline_coords[-1]
     final_length = np.sqrt((final_pt[0] - prev_pt[0]) ** 2 + (final_pt[1] - prev_pt[1]) ** 2)
     num_segments = int(np.ceil(final_length / mesh_side_len)) if mesh_side_len else 1
     dx = (final_pt[0] - prev_pt[0]) / num_segments
@@ -107,13 +115,19 @@ def c_section(
         d (float): Depth of the cross-section.
         l (float): Lip length of the cross-section.
         t (float): Thickness of the cross-section.
-        b2 (float, optional): Width of the smaller flange of the cross-section. If present, will be placed at the top of the cross-section. If None, assumed to be equal to `b`.
+        b2 (float, optional): Width of the smaller flange of the cross-section. If present, will be placed at the top
+            of the cross-section. If None, assumed to be equal to `b`.
         r_inner (float, optional): Inner radius of the cross-section corners. Defaults to 0.0.
-        mesh_corner_deg (float, optional): The angle in degrees for meshing the corners. Defaults to 22.5 degrees. If None, corners will appear as though chamfered, with two points representing the start and end of the corner arc only.
-        mesh_side_len (float, optional): The desired length of the mesh elements along the sides. Defaults to 0.0, and if set to this, it will be configured to a quarter of the maximum outer dimension. If None, no meshing will be performed.
+        mesh_corner_deg (float, optional): The angle in degrees for meshing the corners. Defaults to 22.5 degrees.
+            If None, corners will appear as though chamfered, with two points representing the start and end of the
+            corner arc only.
+        mesh_side_len (float, optional): The desired length of the mesh elements along the sides. Defaults to 0.0,
+            and if set to this, it will be configured to a quarter of the maximum outer dimension. If None, no meshing
+            will be performed.
 
     Returns:
-        np.ndarray: An (N, 2) array of (x, y) coordinates along the centerline of the cross-section. Assumes (0,0) is at the lower left corner.
+        np.ndarray: An (N, 2) array of (x, y) coordinates along the centerline of the cross-section. Assumes (0,0) is
+            at the lower left corner.
     """
     if b2 is None:
         b2 = b
@@ -164,20 +178,28 @@ def z_section(
     mesh_side_len: Optional[float] = 0.0,
 ):
     """
-    Convert cross-section outer dimensions of a "Z" section to centerline coordinates. This function does not mesh the cross-section, and does not account for corner radii. If these are needed, run this function's output through `centerline_coords_to_nodes()`.
+    Convert cross-section outer dimensions of a "Z" section to centerline coordinates. This function does not mesh
+    the cross-section, and does not account for corner radii. If these are needed, run this function's output through
+    `centerline_coords_to_nodes()`.
 
     Args:
         b (float): Width of the cross-section.
         d (float): Depth of the cross-section.
         l (float): Lip length of the cross-section.
         t (float): Thickness of the cross-section.
-        b2 (float, optional): Width of the smaller flange of the cross-section. If present, will be placed at the top of the cross-section. If None, assumed to be equal to `b`.
+        b2 (float, optional): Width of the smaller flange of the cross-section. If present, will be placed at the top
+            of the cross-section. If None, assumed to be equal to `b`.
         r_inner (float, optional): Inner radius of the cross-section corners. Defaults to 0.0.
-        mesh_corner_deg (float, optional): The angle in degrees for meshing the corners. Defaults to 22.5 degrees. If None, corners will appear as though chamfered, with two points representing the start and end of the corner arc only.
-        mesh_side_len (float, optional): The desired length of the mesh elements along the sides. Defaults to 0.0, and if set to this, it will be configured to a quarter of the maximum outer dimension. If None, no meshing will be performed.
+        mesh_corner_deg (float, optional): The angle in degrees for meshing the corners. Defaults to 22.5 degrees.
+            If None, corners will appear as though chamfered, with two points representing the start and end of the
+            corner arc only.
+        mesh_side_len (float, optional): The desired length of the mesh elements along the sides. Defaults to 0.0,
+            and if set to this, it will be configured to a quarter of the maximum outer dimension. If None, no meshing
+            will be performed.
 
     Returns:
-        np.ndarray: An (N, 2) array of (x, y) coordinates along the centerline of the cross-section. Assumes (0,0) is at the lower left corner.
+        np.ndarray: An (N, 2) array of (x, y) coordinates along the centerline of the cross-section. Assumes (0,0) is
+            at the lower left corner.
     """
     if b2 is None:
         b2 = b
@@ -227,7 +249,9 @@ def f_section(
     mesh_side_len: Optional[float] = 0.0,
 ):
     """
-    Convert cross-section outer dimensions of a "F" section to centerline coordinates. This function does not mesh the cross-section, and does not account for corner radii. If these are needed, run this function's output through `centerline_coords_to_nodes()`.
+    Convert cross-section outer dimensions of a "F" section to centerline coordinates. This function does not mesh
+    the cross-section, and does not account for corner radii. If these are needed, run this function's output through
+    `centerline_coords_to_nodes()`.
 
     Args:
         b (float): Width of the cross-section.
@@ -235,11 +259,16 @@ def f_section(
         l (float): Lip length of the cross-section.
         t (float): Thickness of the cross-section.
         r_inner (float, optional): Inner radius of the cross-section corners. Defaults to 0.0.
-        mesh_corner_deg (float, optional): The angle in degrees for meshing the corners. Defaults to 22.5 degrees. If None, corners will appear as though chamfered, with two points representing the start and end of the corner arc only.
-        mesh_side_len (float, optional): The desired length of the mesh elements along the sides. Defaults to 0.0, and if set to this, it will be configured to a quarter of the maximum outer dimension. If None, no meshing will be performed.
+        mesh_corner_deg (float, optional): The angle in degrees for meshing the corners. Defaults to 22.5 degrees.
+            If None, corners will appear as though chamfered, with two points representing the start and end of the
+            corner arc only.
+        mesh_side_len (float, optional): The desired length of the mesh elements along the sides. Defaults to 0.0,
+            and if set to this, it will be configured to a quarter of the maximum outer dimension. If None, no meshing
+            will be performed.
 
     Returns:
-        np.ndarray: An (N, 2) array of (x, y) coordinates along the centerline of the cross-section. Assumes (0,0) is at the lower left corner.
+        np.ndarray: An (N, 2) array of (x, y) coordinates along the centerline of the cross-section. Assumes (0,0) is
+            at the lower left corner.
     """
     if d < 1:
         b_slope = 0.2344
@@ -268,7 +297,8 @@ def f_section(
 
 def _sfia_thickness_and_radius(designation: int, thickness_type: Literal["minimum", "design"] = "design") -> dict:
     """
-    Look up the actual thickness and corner radius for SFIA cold-formed steel sections based on designation thickness in mils.
+    Look up the actual thickness and corner radius for SFIA cold-formed steel sections based on designation thickness
+    in mils.
 
     Args:
         designation (int): The SFIA designation thickness in mils (e.g., 18, 27, 30, etc.).
@@ -284,7 +314,8 @@ def _sfia_thickness_and_radius(designation: int, thickness_type: Literal["minimu
             - reference_gauge (str): The reference gauge for the designation.
 
     Raises:
-        ValueError: If the designation is not found in the thickness table or if the thickness_type is not "minimum" or "design".
+        ValueError: If the designation is not found in the thickness table or if the thickness_type is not "minimum"
+            or "design".
     """
 
     if thickness_type not in ["minimum", "design"]:
@@ -346,7 +377,8 @@ def sfia_section(
     designation: str, mesh_corner_deg: Optional[float] = 22.5, mesh_side_len: Optional[float] = 0.0
 ) -> np.ndarray:
     """
-    Create a SFIA cold-formed steel section based on its designation. All length units are in inches. This function supports "C", "S", "T", "U", "Z", and "F" section types.
+    Create a SFIA cold-formed steel section based on its designation. All length units are in inches. This function
+    supports "C", "S", "T", "U", "Z", and "F" section types.
 
     Args:
         designation (str): The SFIA designation of the section (e.g., "362S200-43").
@@ -365,11 +397,11 @@ def sfia_section(
         raise ValueError(f"Invalid SFIA designation format: '{designation}'.") from exc
 
     d = float(depth) / 100  # Convert depth to inches
-    if (d - round(d)) in [0.12, 0.37, 0.62, 0.87]:
+    if d - round(d) in [0.12, 0.37, 0.62, 0.87]:
         d = d + 0.005  # Adjust depth for designation rounding rules
 
     b = float(flange_width) / 100  # Convert flange width to inches
-    if (b - round(b)) in [0.12, 0.37, 0.62, 0.87]:
+    if b - round(b) in [0.12, 0.37, 0.62, 0.87]:
         b = b + 0.005  # Adjust flange width for designation rounding rules
 
     thickness_info = _sfia_thickness_and_radius(int(thickness_mils), thickness_type="design")
@@ -381,11 +413,6 @@ def sfia_section(
         l = _sfia_lip_length(int(flange_width))
     elif section_type == "F":
         l = 0.500
-
-    print(
-        f"Creating SFIA section with designation '{designation}': "
-        f"depth={d:.3f} in, flange_width={b:.3f} in, thickness={t:.4f} in, lip_length={l:.3f} in, inner_radius={r_inner:.4f} in"
-    )
 
     if section_type in ["S", "T", "U", "C"]:
         return c_section(
