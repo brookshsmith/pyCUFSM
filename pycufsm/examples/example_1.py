@@ -4,7 +4,7 @@ import numpy as np
 
 from pycufsm._types import BC, GBT_Con, Sect_Props
 from pycufsm.fsm import strip
-from pycufsm.pre.forces import stress_gen
+from pycufsm.pre.stresses import stress_gen
 
 # This example presents a very simple Cee section,
 # solved for pure compression,

@@ -4,23 +4,13 @@ from typing import Dict, Literal, Optional, Sequence, Tuple, Union
 import numpy as np
 from scipy import linalg as spla  # type: ignore
 
-import pycufsm.pre.forces as forces
-import pycufsm.solve.cfsm as cfsm
-from pycufsm._types import (
-    BC,
-    Analysis_Config,
-    ArrayLike,
-    Cfsm_Config,
-    Forces,
-    GBT_Con,
-    New_Constraint,
-    New_Element,
-    New_Node_Props,
-    New_Spring,
-    Sect_Props,
-    Yield_Force,
-)
+from pycufsm._types import (BC, Analysis_Config, ArrayLike, Cfsm_Config,
+                            Forces, GBT_Con, New_Constraint, New_Element,
+                            New_Node_Props, New_Spring, Sect_Props,
+                            Yield_Force)
 from pycufsm.helpers import inputs_new_to_old, lengths_recommend
+from pycufsm.pre import stresses
+from pycufsm.solve import cfsm
 from pycufsm.solve.analysis import analysis
 
 # from scipy.sparse.linalg import eigs
@@ -708,7 +698,7 @@ def strip_new(
     if forces is None and yield_force is not None:
         restrained = yield_force["restrain"] if "restrain" in yield_force else False
         offset = yield_force["offset"] if "offset" in yield_force and yield_force["offset"] is not None else [0, 0]
-        all_yields = forces.yield_mp(
+        all_yields = stresses.yield_mp(
             nodes=nodes_old, f_y=yield_force["f_y"], sect_props=sect_props, restrained=restrained
         )
         forces = {"Mxx": 0, "Myy": 0, "M11": 0, "M22": 0, "P": 0, "restrain": restrained, "offset": offset}
@@ -724,7 +714,7 @@ def strip_new(
             "Either 'forces' or 'yield_force' must be set, " + "or stress must be set manually for each node"
         )
     if forces is not None:
-        nodes_stressed = forces.stress_gen(nodes=nodes_old, forces=forces, sect_props=sect_props)
+        nodes_stressed = stresses.stress_gen(nodes=nodes_old, forces=forces, sect_props=sect_props)
     elif np.shape(nodes)[1] == 3:
         nodes_stressed = nodes_old
     else:
