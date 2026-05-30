@@ -4,8 +4,8 @@ from typing import List, Tuple
 import numpy as np
 from scipy import linalg as spla  # type: ignore
 
-from pycufsm.analysis import analysis
-from pycufsm.types import GBT_Con, Sect_Props
+from pycufsm._types import GBT_Con, Sect_Props
+from pycufsm.solve.analysis import analysis
 
 # Originally developed for MATLAB by Benjamin Schafer PhD et al
 # Ported to Python by Brooks Smith MEng, PE, CPEng

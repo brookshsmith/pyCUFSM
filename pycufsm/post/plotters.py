@@ -6,7 +6,7 @@ from matplotlib.collections import PatchCollection
 from matplotlib.patches import Polygon
 
 import pycufsm.post.helpers as helpers
-from pycufsm.analysis import analysis
+from pycufsm.solve.analysis import analysis
 
 
 def cross_sect(
