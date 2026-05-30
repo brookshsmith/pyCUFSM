@@ -6,9 +6,7 @@ from scipy import linalg as spla  # type: ignore
 
 import pycufsm.pre.forces as forces
 import pycufsm.solve.cfsm as cfsm
-from pycufsm.helpers import inputs_new_to_old, lengths_recommend
-from pycufsm.solve.analysis import analysis
-from pycufsm.types import (
+from pycufsm._types import (
     BC,
     Analysis_Config,
     ArrayLike,
@@ -22,6 +20,8 @@ from pycufsm.types import (
     Sect_Props,
     Yield_Force,
 )
+from pycufsm.helpers import inputs_new_to_old, lengths_recommend
+from pycufsm.solve.analysis import analysis
 
 # from scipy.sparse.linalg import eigs
 # Originally developed for MATLAB by Benjamin Schafer PhD et al

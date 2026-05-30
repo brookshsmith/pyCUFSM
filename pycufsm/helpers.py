@@ -4,7 +4,7 @@ from typing import Dict, List, Literal, Optional, Sequence, Tuple, Union
 import numpy as np
 from scipy.io import loadmat  # type: ignore
 
-from pycufsm.types import (
+from pycufsm._types import (
     BC,
     Analysis_Config,
     ArrayLike,
