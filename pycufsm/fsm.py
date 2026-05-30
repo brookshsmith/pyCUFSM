@@ -19,7 +19,7 @@ from pycufsm._types import (
     Yield_Force,
 )
 from pycufsm.helpers import inputs_new_to_old, lengths_recommend
-from pycufsm.pre import stresses
+from pycufsm.pre import cutwp, stresses
 from pycufsm.solve import cfsm
 from pycufsm.solve.analysis import analysis
 
@@ -681,6 +681,12 @@ def strip_new(
     if lengths is None or isinstance(lengths, int):
         n_lengths = lengths if isinstance(lengths, int) else 50
         lengths = []
+
+    if sect_props is None:
+        sect_props = cutwp.prop2_new(
+            nodes=nodes,
+            elements=elements,
+        )
 
     (
         props_old,
