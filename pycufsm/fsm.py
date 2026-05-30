@@ -4,10 +4,20 @@ from typing import Dict, Literal, Optional, Sequence, Tuple, Union
 import numpy as np
 from scipy import linalg as spla  # type: ignore
 
-from pycufsm._types import (BC, Analysis_Config, ArrayLike, Cfsm_Config,
-                            Forces, GBT_Con, New_Constraint, New_Element,
-                            New_Node_Props, New_Spring, Sect_Props,
-                            Yield_Force)
+from pycufsm._types import (
+    BC,
+    Analysis_Config,
+    ArrayLike,
+    Cfsm_Config,
+    Forces,
+    GBT_Con,
+    New_Constraint,
+    New_Element,
+    New_Node_Props,
+    New_Spring,
+    Sect_Props,
+    Yield_Force,
+)
 from pycufsm.helpers import inputs_new_to_old, lengths_recommend
 from pycufsm.pre import stresses
 from pycufsm.solve import cfsm
