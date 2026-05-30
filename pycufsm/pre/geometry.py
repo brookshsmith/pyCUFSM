@@ -5,7 +5,7 @@ import numpy as np
 
 from pycufsm._types import ArrayLike
 
-# Note that this file is entirely new to pyCUFSM, and similar functions will NOT be found in the MATLAB version of CUFSM.
+# Note that this file is entirely new to pyCUFSM, and similar functions will NOT be found in the MATLAB version of CUFSM
 
 ANGLE_TOLERANCE = np.radians(5)  # Tolerance for detecting a corner in radians
 

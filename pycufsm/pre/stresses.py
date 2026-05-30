@@ -1,9 +1,9 @@
-from typing import Optional, Tuple, Union
+from typing import Union
 
 import numpy as np
 from scipy import linalg as spla  # type: ignore
 
-from pycufsm._types import Forces, Sect_Geom, Sect_Props
+from pycufsm._types import Forces, Sect_Props
 
 # Originally developed for MATLAB by Benjamin Schafer PhD et al
 # Ported to Python by Brooks Smith MEng, PE

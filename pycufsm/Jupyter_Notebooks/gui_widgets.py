@@ -3,7 +3,7 @@ from typing import List, Tuple
 import ipywidgets as widgets
 import numpy as np
 
-import pycufsm.post.plotters as plotters
+from pycufsm.post import plotters
 
 
 def prevals() -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, List[int]]:
@@ -53,7 +53,42 @@ def prevals() -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarra
 
 
 class Preprocess:
-    def wprops(self, props: np.ndarray, m: int) -> Tuple[widgets.VBox, widgets.Button, widgets.Button, list]:
+    def __init__(self):
+        self.m = 0
+        self.n = 0
+        self.e = 0
+        self.nodes = np.array([])
+        self.elements = np.array([])
+        self.props = np.array([])
+        self.springs = np.array([])
+        self.constraints = np.array([])
+        self.flag = []
+        self.mitems = []
+        self.nitems = []
+        self.eitems = []
+        self.ADDMAT = None
+        self.DELMAT = None
+        self.ADDNODE = None
+        self.DELNODE = None
+        self.ADDELEM = None
+        self.DELELEM = None
+        self.Submit = None
+        self.bc_widget = None
+        self.neigs = None
+        self.rowm = None
+        self.rnode = None
+        self.relem = None
+        self.rflag = None
+        self.rBC = None
+        self.cs = None
+        self.page = None
+        self.row1 = None
+        self.row = None
+        self.row0 = None
+        self.B_C = None
+        self.flags = None
+
+    def wprops(self, m: int) -> Tuple[widgets.VBox, widgets.Button, widgets.Button, list]:
         self.m = m
         matTitle = widgets.Label(value="Material Properties")
         mattext = ["mat#", "Ex", "Ey", "vx", "vy", "G"]
@@ -241,7 +276,7 @@ class Preprocess:
         self.rBC = widgets.VBox([self.bc_widget, self.neigs], layout=widgets.Layout(width="50%"))
         return self.rBC, self.bc_widget, self.neigs
 
-    def Assemble(self, page, rowm, rnode, relem, rflag, cs, rBC):
+    def Assemble(self):
         self.row1 = widgets.HBox([self.cs, self.rflag])
         self.row = widgets.HBox([self.rnode, self.row1])
         self.row0 = widgets.HBox([self.rowm, self.rBC], layout=widgets.Layout(width="100%"))
@@ -256,7 +291,7 @@ class Preprocess:
         del self.page
         self.page = widgets.VBox([self.row0, self.row, self.relem])
 
-    def add_material(self, b):
+    def add_material(self):
         self.m = self.m + 1
         self.props = [[] for i in range(self.m)]
         for i in range(self.m):
@@ -266,26 +301,26 @@ class Preprocess:
                 else:
                     self.props[i].append(self.mitems[i][j].value)
         self.props = np.array(self.props)
-        self.rowm, self.ADDMAT, self.DELMAT, self.mitems = self.wprops(self.props, self.m)
+        self.rowm, self.ADDMAT, self.DELMAT, self.mitems = self.wprops(self.m)
         self.cs = widgets.Output()
         with self.cs:
             plotters.cross_sect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
-        self.Assemble(self.page, self.rowm, self.rnode, self.relem, self.rflag, self.cs, self.rBC)
+        self.Assemble()
 
-    def del_material(self, b):
+    def del_material(self):
         self.m = self.m - 1
         self.props = [[] for i in range(self.m)]
         for i in range(self.m):
             for j in range(6):
                 self.props[i].append(self.mitems[i][j].value)
         self.props = np.array(self.props)
-        self.rowm, self.ADDMAT, self.DELMAT, self.mitems = self.wprops(self.props, self.m)
+        self.rowm, self.ADDMAT, self.DELMAT, self.mitems = self.wprops(self.m)
         self.cs = widgets.Output()
         with self.cs:
             plotters.cross_sect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
-        self.Assemble(self.page, self.rowm, self.rnode, self.relem, self.rflag, self.cs, self.rBC)
+        self.Assemble()
 
-    def add_node(self, b):
+    def add_node(self):
         self.n = self.n + 1
         self.nodes = [[] for i in range(self.n)]
         for i in range(self.n):
@@ -299,12 +334,12 @@ class Preprocess:
         self.cs = widgets.Output()
         with self.cs:
             plotters.cross_sect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
-        self.Assemble(self.page, self.rowm, self.rnode, self.relem, self.rflag, self.cs, self.rBC)
+        self.Assemble()
 
-    def del_node(self, b):
+    def del_node(self):
         self.n = self.n - 1
         if self.n == len(self.eitems):
-            self.del_elem(b)
+            self.del_elem()
         self.nodes = [[] for i in range(self.n)]
         for i in range(self.n):
             for j in range(8):
@@ -314,9 +349,9 @@ class Preprocess:
         self.cs = widgets.Output()
         with self.cs:
             plotters.cross_sect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
-        self.Assemble(self.page, self.rowm, self.rnode, self.relem, self.rflag, self.cs, self.rBC)
+        self.Assemble()
 
-    def add_elem(self, b):
+    def add_elem(self):
         self.e = self.e + 1
         self.elements = [[] for i in range(self.e)]
         for i in range(self.e):
@@ -330,9 +365,9 @@ class Preprocess:
         self.cs = widgets.Output()
         with self.cs:
             plotters.cross_sect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
-        self.Assemble(self.page, self.rowm, self.rnode, self.relem, self.rflag, self.cs, self.rBC)
+        self.Assemble()
 
-    def del_elem(self, b):
+    def del_elem(self):
         self.e = self.e - 1
         self.elements = [[] for i in range(self.e)]
         for i in range(self.e):
@@ -343,9 +378,9 @@ class Preprocess:
         self.cs = widgets.Output()
         with self.cs:
             plotters.cross_sect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
-        self.Assemble(self.page, self.rowm, self.rnode, self.relem, self.rflag, self.cs, self.rBC)
+        self.Assemble()
 
-    def submit(self, b):
+    def submit(self):
         self.props = [[] for i in range(self.m)]
         for i in range(self.m):
             for j in range(6):
@@ -371,7 +406,7 @@ class Preprocess:
         self.cs = widgets.Output()
         with self.cs:
             plotters.cross_sect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
-        self.Assemble(self.page, self.rowm, self.rnode, self.relem, self.rflag, self.cs, self.rBC)
+        self.Assemble()
 
     def run(self, m, n, e, props, nodes, elements, springs, constraints, flag):
         self.m = m
@@ -383,7 +418,7 @@ class Preprocess:
         self.springs = springs
         self.constraints = constraints
         self.flag = flag
-        self.rowm, self.ADDMAT, self.DELMAT, self.mitems = self.wprops(self.props, len(self.props))
+        self.rowm, self.ADDMAT, self.DELMAT, self.mitems = self.wprops(len(self.props))
         self.rnode, self.ADDNODE, self.DELNODE, self.nitems = self.wnodes(self.nodes, len(self.nodes))
         self.relem, self.ADDELEM, self.DELELEM, self.eitems = self.welems(self.elements, len(self.elements))
         self.rflag, self.Submit, self.flags = self.wflag(self.flag)
@@ -392,5 +427,5 @@ class Preprocess:
         with self.cs:
             plotters.cross_sect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
         self.page = widgets.FloatText(value=1)
-        self.Assemble(self.page, self.rowm, self.rnode, self.relem, self.rflag, self.cs, self.rBC)
+        self.Assemble()
         return self.props, self.nodes, self.elements
