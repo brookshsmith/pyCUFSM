@@ -2,7 +2,7 @@ from typing import Optional, Sequence
 
 import numpy as np
 
-from pycufsm.types import ArrayLike, New_Element, Sect_Props
+from pycufsm._types import ArrayLike, New_Element, Sect_Props
 
 
 def prop2_new(nodes: ArrayLike, elements: Sequence[New_Element]) -> Sect_Props:

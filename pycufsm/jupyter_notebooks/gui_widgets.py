@@ -1,12 +1,17 @@
 from typing import List, Tuple
 
-import ipywidgets as widgets
+import ipywidgets as widgets  # pylint: disable=import-error
 import numpy as np
 
-import pycufsm.plotters as crossect
+from pycufsm.post import plotters
 
 
 def prevals() -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, List[int]]:
+    """Returns default material, node, element, spring, constraint, and flag values.
+
+    Returns:
+        Tuple of (props, nodes, elements, springs, constraints, flag).
+    """
     springs = np.array([])
     constraints = np.array([])
     flag = [1, 0, 0, 0, 1, 0, 0, 0, 0, 0]
@@ -52,15 +57,61 @@ def prevals() -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarra
 #     return tab
 
 
-class Preprocess:
-    def wprops(self, props: np.ndarray, m: int) -> Tuple[widgets.VBox, widgets.Button, widgets.Button, list]:
+class Preprocess:  # pylint: disable=too-many-instance-attributes
+    """Widget-based preprocessor for cross-section geometry input in Jupyter notebooks."""
+
+    def __init__(self):
+        """Initializes all instance attributes to default values."""
+        self.m = 0
+        self.n = 0
+        self.e = 0
+        self.nodes = np.array([])
+        self.elements = np.array([])
+        self.props = np.array([])
+        self.springs = np.array([])
+        self.constraints = np.array([])
+        self.flag = []
+        self.mitems = []
+        self.nitems = []
+        self.eitems = []
+        self.add_mat_btn = None
+        self.del_mat_btn = None
+        self.add_node_btn = None
+        self.del_node_btn = None
+        self.add_elem_btn = None
+        self.del_elem_btn = None
+        self.submit_btn = None
+        self.bc_widget = None
+        self.neigs = None
+        self.rowm = None
+        self.rnode = None
+        self.relem = None
+        self.rflag = None
+        self.r_bc = None
+        self.cs = None
+        self.page = None
+        self.row1 = None
+        self.row = None
+        self.row0 = None
+        self.b_c = None
+        self.flags = None
+
+    def wprops(self, m: int) -> Tuple[widgets.VBox, widgets.Button, widgets.Button, list]:
+        """Builds the material properties widget panel.
+
+        Args:
+            m: Number of materials.
+
+        Returns:
+            Tuple of (panel widget, add button, delete button, material item list).
+        """
         self.m = m
         matTitle = widgets.Label(value="Material Properties")
         mattext = ["mat#", "Ex", "Ey", "vx", "vy", "G"]
         prop: List[widgets.GridBox] = [[] for i in range(self.m)]
         self.mitems: List[widgets.FloatText] = [[] for i in range(self.m)]
-        self.ADDMAT = widgets.Button(description="Add Material", layout=widgets.Layout(border="solid 1px black"))
-        self.DELMAT = widgets.Button(
+        self.add_mat_btn = widgets.Button(description="Add Material", layout=widgets.Layout(border="solid 1px black"))
+        self.del_mat_btn = widgets.Button(
             description="Remove Material",
             layout=widgets.Layout(border="solid 1px black"),
         )
@@ -91,21 +142,30 @@ class Preprocess:
                     layout=widgets.Layout(grid_template_columns="repeat(6, 50px[col-start])"),
                 )
         matr = widgets.VBox([prop[j] for j in range(m)])
-        brow = widgets.HBox([self.ADDMAT, self.DELMAT])
+        brow = widgets.HBox([self.add_mat_btn, self.del_mat_btn])
         self.rowm = widgets.VBox(
             [matTitle, matlabel, matr, brow],
             layout=widgets.Layout(border="solid 1px black", width="35%"),
         )
-        return self.rowm, self.ADDMAT, self.DELMAT, self.mitems
+        return self.rowm, self.add_mat_btn, self.del_mat_btn, self.mitems
 
     def wnodes(self, nodes, n):
+        """Builds the nodes widget panel.
+
+        Args:
+            nodes: Array of node data.
+            n: Number of nodes.
+
+        Returns:
+            Tuple of (panel widget, add button, delete button, node item list).
+        """
         self.nodes = nodes
         nodTitle = widgets.Label(value="Nodes")
         nodetext = ["Node#", "x", "y", "xdof", "zdof", "ydof", "qdof", "stress"]
         node = [[] for i in range(self.n)]
         self.nitems = [[] for i in range(self.n)]
-        self.ADDNODE = widgets.Button(description="Add Node", layout=widgets.Layout(border="solid 1px black"))
-        self.DELNODE = widgets.Button(description="Remove Node", layout=widgets.Layout(border="solid 1px black"))
+        self.add_node_btn = widgets.Button(description="Add Node", layout=widgets.Layout(border="solid 1px black"))
+        self.del_node_btn = widgets.Button(description="Remove Node", layout=widgets.Layout(border="solid 1px black"))
         nlabel = widgets.HBox([widgets.Label(value=nodetext[j], layout=widgets.Layout(width="55px")) for j in range(8)])
         for i in range(self.n):
             if i < len(self.nodes):
@@ -127,24 +187,33 @@ class Preprocess:
                     )
                 node[i] = widgets.HBox(self.nitems[i], layout=widgets.Layout(width="490px", height="30px"))
         noder0 = widgets.VBox([node[j] for j in range(n)])
-        brow = widgets.HBox([self.ADDNODE, self.DELNODE])
+        brow = widgets.HBox([self.add_node_btn, self.del_node_btn])
         self.rnode = widgets.VBox(
             [nodTitle, nlabel, noder0, brow],
             layout=widgets.Layout(border="solid 1px black"),
         )
-        return self.rnode, self.ADDNODE, self.DELNODE, self.nitems
+        return self.rnode, self.add_node_btn, self.del_node_btn, self.nitems
 
     def welems(self, elements, e):
+        """Builds the elements widget panel.
+
+        Args:
+            elements: Array of element data.
+            e: Number of elements.
+
+        Returns:
+            Tuple of (panel widget, add button, delete button, element item list).
+        """
         self.elements = elements
         elTitle = widgets.Label(value="Elements")
         elemtext = ["Element#", "Nodei", "Nodej", "t", "Mat#"]
         elem = [[] for i in range(self.e)]
         self.eitems = [[] for i in range(self.e)]
-        self.ADDELEM = widgets.Button(
+        self.add_elem_btn = widgets.Button(
             description="Add Element",
             layout=widgets.Layout(border="solid 1px black", width="120px"),
         )
-        self.DELELEM = widgets.Button(
+        self.del_elem_btn = widgets.Button(
             description="Remove Element",
             layout=widgets.Layout(border="solid 1px black", width="120px"),
         )
@@ -180,14 +249,22 @@ class Preprocess:
                         )
                 elem[i] = widgets.GridBox(self.eitems[i], layout=widgets.Layout(height="30px"))
         elemr = widgets.VBox([elem[j] for j in range(e)])
-        brow = widgets.HBox([self.ADDELEM, self.DELELEM], layout=widgets.Layout(width="30%"))
+        brow = widgets.HBox([self.add_elem_btn, self.del_elem_btn], layout=widgets.Layout(width="30%"))
         self.relem = widgets.VBox(
             [elTitle, elabel, elemr, brow],
             layout=widgets.Layout(border="solid 1px black"),
         )
-        return self.relem, self.ADDELEM, self.DELELEM, self.eitems
+        return self.relem, self.add_elem_btn, self.del_elem_btn, self.eitems
 
     def wflag(self, flag):
+        """Builds the plot options widget panel.
+
+        Args:
+            flag: List of flag values (0 or 1) for each plot option.
+
+        Returns:
+            Tuple of (panel widget, submit button, flag checkbox list).
+        """
         FlagTitle = widgets.Label(value="Plot Options")
         Flagtext = [
             "node",
@@ -202,29 +279,30 @@ class Preprocess:
             "propaxis",
         ]
         self.flags = []
-        for i in range(len(Flagtext)):
-            if flag[i] == 1:
-                flagv = True
-            else:
-                flagv = False
+        for i, label in enumerate(Flagtext):
             self.flags.append(
                 widgets.Checkbox(
-                    description=Flagtext[i],
-                    value=flagv,
+                    description=label,
+                    value=flag[i] == 1,
                     indent=False,
                     layout=widgets.Layout(width="150px"),
                 )
             )
         flag0 = widgets.VBox([self.flags[j] for j in range(10)])
-        self.Submit = widgets.Button(
+        self.submit_btn = widgets.Button(
             description="Plot",
             layout=widgets.Layout(border="solid 1px black", width="150px"),
         )
-        self.rflag = widgets.VBox([FlagTitle, flag0, self.Submit])
-        return self.rflag, self.Submit, self.flags
+        self.rflag = widgets.VBox([FlagTitle, flag0, self.submit_btn])
+        return self.rflag, self.submit_btn, self.flags
 
-    def wBound_Cond(self):
-        self.B_C = ["S-S", "C-C", "S-C", "C-F", "C-G"]
+    def w_bound_cond(self):
+        """Builds the boundary conditions widget panel.
+
+        Returns:
+            Tuple of (panel widget, dropdown widget, eigenvalue count widget).
+        """
+        self.b_c = ["S-S", "C-C", "S-C", "C-F", "C-G"]
         BCtext = [
             "simple-simple",
             "clamped-clamped",
@@ -238,26 +316,27 @@ class Preprocess:
             description="Boundary Conditions",
         )
         self.neigs = widgets.IntText(value=20, description="Number of eignevalues")
-        self.rBC = widgets.VBox([self.bc_widget, self.neigs], layout=widgets.Layout(width="50%"))
-        return self.rBC, self.bc_widget, self.neigs
+        self.r_bc = widgets.VBox([self.bc_widget, self.neigs], layout=widgets.Layout(width="50%"))
+        return self.r_bc, self.bc_widget, self.neigs
 
-    def Assemble(self, page, rowm, rnode, relem, rflag, cs, rBC):
+    def assemble(self):
+        """Assembles all sub-panels into the main page widget and wires button callbacks."""
         self.row1 = widgets.HBox([self.cs, self.rflag])
         self.row = widgets.HBox([self.rnode, self.row1])
-        self.row0 = widgets.HBox([self.rowm, self.rBC], layout=widgets.Layout(width="100%"))
-        self.ADDMAT.on_click(self.add_material)
-        self.ADDNODE.on_click(self.add_node)
-        self.ADDELEM.on_click(self.add_elem)
-        self.Submit.on_click(self.submit)
-        self.DELMAT.on_click(self.del_material)
-        self.DELNODE.on_click(self.del_node)
-        self.DELELEM.on_click(self.del_elem)
+        self.row0 = widgets.HBox([self.rowm, self.r_bc], layout=widgets.Layout(width="100%"))
+        self.add_mat_btn.on_click(self.add_material)
+        self.add_node_btn.on_click(self.add_node)
+        self.add_elem_btn.on_click(self.add_elem)
+        self.submit_btn.on_click(self.submit)
+        self.del_mat_btn.on_click(self.del_material)
+        self.del_node_btn.on_click(self.del_node)
+        self.del_elem_btn.on_click(self.del_elem)
         self.page.close()
         del self.page
         self.page = widgets.VBox([self.row0, self.row, self.relem])
-        display(self.page)
 
-    def add_material(self, b):
+    def add_material(self):
+        """Adds a new material row to the materials panel."""
         self.m = self.m + 1
         self.props = [[] for i in range(self.m)]
         for i in range(self.m):
@@ -267,26 +346,28 @@ class Preprocess:
                 else:
                     self.props[i].append(self.mitems[i][j].value)
         self.props = np.array(self.props)
-        self.rowm, self.ADDMAT, self.DELMAT, self.mitems = self.wprops(self.props, self.m)
+        self.rowm, self.add_mat_btn, self.del_mat_btn, self.mitems = self.wprops(self.m)
         self.cs = widgets.Output()
         with self.cs:
-            crossect.crossect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
-        self.Assemble(self.page, self.rowm, self.rnode, self.relem, self.rflag, self.cs, self.rBC)
+            plotters.cross_sect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
+        self.assemble()
 
-    def del_material(self, b):
+    def del_material(self):
+        """Removes the last material row from the materials panel."""
         self.m = self.m - 1
         self.props = [[] for i in range(self.m)]
         for i in range(self.m):
             for j in range(6):
                 self.props[i].append(self.mitems[i][j].value)
         self.props = np.array(self.props)
-        self.rowm, self.ADDMAT, self.DELMAT, self.mitems = self.wprops(self.props, self.m)
+        self.rowm, self.add_mat_btn, self.del_mat_btn, self.mitems = self.wprops(self.m)
         self.cs = widgets.Output()
         with self.cs:
-            crossect.crossect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
-        self.Assemble(self.page, self.rowm, self.rnode, self.relem, self.rflag, self.cs, self.rBC)
+            plotters.cross_sect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
+        self.assemble()
 
-    def add_node(self, b):
+    def add_node(self):
+        """Adds a new node row to the nodes panel."""
         self.n = self.n + 1
         self.nodes = [[] for i in range(self.n)]
         for i in range(self.n):
@@ -296,28 +377,30 @@ class Preprocess:
                 else:
                     self.nodes[i].append(self.nitems[i][j].value)
         self.nodes = np.array(self.nodes)
-        self.rnode, self.ADDNODE, self.DELNODE, self.nitems = self.wnodes(self.nodes, self.n)
+        self.rnode, self.add_node_btn, self.del_node_btn, self.nitems = self.wnodes(self.nodes, self.n)
         self.cs = widgets.Output()
         with self.cs:
-            crossect.crossect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
-        self.Assemble(self.page, self.rowm, self.rnode, self.relem, self.rflag, self.cs, self.rBC)
+            plotters.cross_sect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
+        self.assemble()
 
-    def del_node(self, b):
+    def del_node(self):
+        """Removes the last node row from the nodes panel."""
         self.n = self.n - 1
         if self.n == len(self.eitems):
-            self.del_elem(b)
+            self.del_elem()
         self.nodes = [[] for i in range(self.n)]
         for i in range(self.n):
             for j in range(8):
                 self.nodes[i].append(self.nitems[i][j].value)
         self.nodes = np.array(self.nodes)
-        self.rnode, self.ADDNODE, self.DELNODE, self.nitems = self.wnodes(self.nodes, self.n)
+        self.rnode, self.add_node_btn, self.del_node_btn, self.nitems = self.wnodes(self.nodes, self.n)
         self.cs = widgets.Output()
         with self.cs:
-            crossect.crossect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
-        self.Assemble(self.page, self.rowm, self.rnode, self.relem, self.rflag, self.cs, self.rBC)
+            plotters.cross_sect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
+        self.assemble()
 
-    def add_elem(self, b):
+    def add_elem(self):
+        """Adds a new element row to the elements panel."""
         self.e = self.e + 1
         self.elements = [[] for i in range(self.e)]
         for i in range(self.e):
@@ -327,26 +410,28 @@ class Preprocess:
                 else:
                     self.elements[i].append(self.eitems[i][j].value)
         self.elements = np.array(self.elements)
-        self.relem, self.ADDELEM, self.DELELEM, self.eitems = self.welems(self.elements, self.e)
+        self.relem, self.add_elem_btn, self.del_elem_btn, self.eitems = self.welems(self.elements, self.e)
         self.cs = widgets.Output()
         with self.cs:
-            crossect.crossect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
-        self.Assemble(self.page, self.rowm, self.rnode, self.relem, self.rflag, self.cs, self.rBC)
+            plotters.cross_sect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
+        self.assemble()
 
-    def del_elem(self, b):
+    def del_elem(self):
+        """Removes the last element row from the elements panel."""
         self.e = self.e - 1
         self.elements = [[] for i in range(self.e)]
         for i in range(self.e):
             for j in range(5):
                 self.elements[i].append(self.eitems[i][j].value)
         self.elements = np.array(self.elements)
-        self.relem, self.ADDELEM, self.DELELEM, self.eitems = self.welems(self.elements, self.e)
+        self.relem, self.add_elem_btn, self.del_elem_btn, self.eitems = self.welems(self.elements, self.e)
         self.cs = widgets.Output()
         with self.cs:
-            crossect.crossect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
-        self.Assemble(self.page, self.rowm, self.rnode, self.relem, self.rflag, self.cs, self.rBC)
+            plotters.cross_sect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
+        self.assemble()
 
-    def submit(self, b):
+    def submit(self):
+        """Reads all widget values, updates stored arrays, and redraws the cross-section."""
         self.props = [[] for i in range(self.m)]
         for i in range(self.m):
             for j in range(6):
@@ -362,19 +447,31 @@ class Preprocess:
             for j in range(5):
                 self.elements[i].append(self.eitems[i][j].value)
         self.elements = np.array(self.elements)
-        for i in range(len(self.flags)):
-            if self.flags[i].value == True:
-                self.flag[i] = 1
-            else:
-                self.flag[i] = 0
-
-        self.rflag, self.Submit, self.flags = self.wflag(self.flag)
+        for i, flag_widget in enumerate(self.flags):
+            self.flag[i] = 1 if flag_widget.value else 0
+        self.rflag, self.submit_btn, self.flags = self.wflag(self.flag)
         self.cs = widgets.Output()
         with self.cs:
-            crossect.crossect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
-        self.Assemble(self.page, self.rowm, self.rnode, self.relem, self.rflag, self.cs, self.rBC)
+            plotters.cross_sect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
+        self.assemble()
 
     def run(self, m, n, e, props, nodes, elements, springs, constraints, flag):
+        """Initializes and displays the full preprocessor UI.
+
+        Args:
+            m: Number of materials.
+            n: Number of nodes.
+            e: Number of elements.
+            props: Array of material properties.
+            nodes: Array of node data.
+            elements: Array of element data.
+            springs: Array of spring data.
+            constraints: Array of constraint data.
+            flag: List of plot option flags.
+
+        Returns:
+            Tuple of updated (props, nodes, elements).
+        """
         self.m = m
         self.n = n
         self.e = e
@@ -384,14 +481,14 @@ class Preprocess:
         self.springs = springs
         self.constraints = constraints
         self.flag = flag
-        self.rowm, self.ADDMAT, self.DELMAT, self.mitems = self.wprops(self.props, len(self.props))
-        self.rnode, self.ADDNODE, self.DELNODE, self.nitems = self.wnodes(self.nodes, len(self.nodes))
-        self.relem, self.ADDELEM, self.DELELEM, self.eitems = self.welems(self.elements, len(self.elements))
-        self.rflag, self.Submit, self.flags = self.wflag(self.flag)
-        self.rBC, self.bc_widget, self.neigs = self.wBound_Cond()
+        self.rowm, self.add_mat_btn, self.del_mat_btn, self.mitems = self.wprops(len(self.props))
+        self.rnode, self.add_node_btn, self.del_node_btn, self.nitems = self.wnodes(self.nodes, len(self.nodes))
+        self.relem, self.add_elem_btn, self.del_elem_btn, self.eitems = self.welems(self.elements, len(self.elements))
+        self.rflag, self.submit_btn, self.flags = self.wflag(self.flag)
+        self.r_bc, self.bc_widget, self.neigs = self.w_bound_cond()
         self.cs = widgets.Output()
         with self.cs:
-            crossect.crossect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
+            plotters.cross_sect(self.nodes, self.elements, self.springs, self.constraints, self.flag)
         self.page = widgets.FloatText(value=1)
-        self.Assemble(self.page, self.rowm, self.rnode, self.relem, self.rflag, self.cs, self.rBC)
+        self.assemble()
         return self.props, self.nodes, self.elements

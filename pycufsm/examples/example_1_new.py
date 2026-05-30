@@ -2,8 +2,8 @@ from typing import Dict, List
 
 import numpy as np
 
+from pycufsm._types import Analysis_Config, New_Element, Sect_Props
 from pycufsm.fsm import strip_new
-from pycufsm.types import Analysis_Config, New_Element, Sect_Props
 
 # This example presents a very simple Cee section,
 # solved for pure compression,
