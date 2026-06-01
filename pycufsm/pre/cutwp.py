@@ -152,7 +152,7 @@ def prop2(coord: np.ndarray, ends: np.ndarray) -> Sect_Props:
     # Compute moment of inertia
     I_xx = np.sum((y_diffs**2 / 12 + (y_means - y_centroid) ** 2) * lengths * thicknesses)
     I_yy = np.sum((x_diffs**2 / 12 + (x_means - x_centroid) ** 2) * lengths * thicknesses)
-    I_xy = np.sum((x_diffs * y_diffs / 12 + (x_means - x_centroid) * (y_means - y_centroid) * lengths * thicknesses))
+    I_xy = np.sum((x_diffs * y_diffs / 12 + (x_means - x_centroid) * (y_means - y_centroid)) * lengths * thicknesses)
     if np.abs(I_xy / area**2) < 1e-12:
         I_xy = np.float64(0.0)
 
