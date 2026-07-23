@@ -1,16 +1,7 @@
-[build-system]
-requires = [
-    "poetry-core>=1.2.0",
-    "setuptools>=61.0",
-    "cython>=3.0",
-    "numpy>=2.0.0rc1",
-]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry]
+[project]
 name = "pycufsm"
 version = "0.2.0"
-authors = ["Brooks Smith <smith120bh@gmail.com>"]
+authors = [{ name = "Brooks H. Smith", email = "smith120bh@gmail.com" }]
 description = "Python CUFSM (Constrained and Unconstrained Finite Strip Method)"
 keywords = [
     "FSM",
@@ -23,7 +14,7 @@ keywords = [
     "structural engineering",
     "structural analysis",
 ]
-license = "AFL-3.0"
+license = "LGPL-3.0"
 classifiers = [
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Physics",
@@ -31,53 +22,63 @@ classifiers = [
     "Operating System :: OS Independent",
     "Intended Audience :: Science/Research",
     "Programming Language :: Python :: 3",
-    "Development Status :: 3 - Alpha",
-    "License :: OSI Approved :: Academic Free License (AFL)",
 ]
 readme = "README.md"
-homepage = "https://github.com/ClearCalcs/pyCUFSM"
-repository = "https://github.com/ClearCalcs/pyCUFSM"
-documentation = "https://pycufsm.readthedocs.io"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.23.5",
+    "scipy>=1.10.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/brookshsmith/pyCUFSM"
+Repository = "https://github.com/brookshsmith/pyCUFSM"
+Documentation = "https://pycufsm.readthedocs.io"
+
+[project.optional-dependencies]
+plot = [
+    "matplotlib>=3.2"
+]
+jupyter = [
+    "ipywidgets>=8.0.0",
+    "matplotlib>=3.2"
+]
+
+[dependency-groups]
+dev = [
+    "numpy==2.2.6",
+    "scipy==1.15.3",
+    "matplotlib==3.10.7",
+    "ipywidgets==8.1.8",
+]
+test = [
+    "pylint==4.0.2",
+    "mypy==1.18.2",
+    "typing_extensions==4.15.0; python_version<'3.12'",
+    "black[jupyter]==25.9.0",
+    "pytest==8.4.2",
+    "pytest-describe==3.0.0",
+    "pytest-pspec==0.0.4",
+    "pytest-raises==0.11",
+]
+docs = [
+    "sphinx==9.1.0; python_version>='3.12'",
+    "sphinx-autoapi==3.6.0",
+    "sphinx-rtd-theme==3.1.0",
+]
+
+[build-system]
+requires = [
+    "poetry-core>=2.2.0",
+    "setuptools>=61.0",
+    "cython>=3.0",
+    "numpy>=2.0.0rc1",
+]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
 packages = [{ include = "pycufsm" }]
 include = ["py.typed", "*.pyx"]
-
-[tool.poetry.dependencies]
-python = ">=3.10"
-numpy = ">=1.23.5"
-scipy = ">=1.10.0"
-ipywidgets = { version = ">=8.0.0", optional = true }
-matplotlib = { version = ">=3.2", optional = true }
-sphinx = { version = ">=8.0.0", optional = true }
-sphinx_autoapi = { version = ">=3.6.0", optional = true }
-sphinx-rtd-theme = { version = ">=3.0.0", optional = true }
-
-[tool.poetry.group.dev.dependencies]
-numpy = "==2.2.6"
-scipy = "==1.15.3"
-matplotlib = "==3.10.7"
-typing_extensions = { version = "==4.15.0", python = "<3.12" }
-ipywidgets = "==8.1.8"
-
-[tool.poetry.group.test.dependencies]
-pylint = "==4.0.2"
-mypy = "==1.18.2"
-black = { version = "==25.9.0", extras = ["jupyter"] }
-pytest = "==8.4.2"
-pytest-describe = "==3.0.0"
-pytest-pspec = "==0.0.4"
-pytest-raises = "==0.11"
-
-[tool.poetry.group.docs]
-optional = true
-
-[tool.poetry.group.docs.dependencies]
-sphinx = { version = "==9.1.0", python = ">=3.12" }
-sphinx_autoapi = "==3.6.0"
-
-[tool.poetry.extras]
-plot = ["matplotlib"]
-jupyter = ["ipywidgets", "matplotlib"]
-docs = ["sphinx", "sphinx_autoapi", "sphinx-rtd-theme"]
 
 [tool.poetry.build]
 script = "build_cython_ext.py"
