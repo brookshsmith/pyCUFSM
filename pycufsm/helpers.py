@@ -113,7 +113,7 @@ def load_cufsm_mat(mat_file: Optional[str] = None, mat_data: Optional[Cufsm_MAT_
             elements[i, 2] = int(np.double(elements[i, 2])) - 1
             cufsm_input["elements"] = np.array(elements)
     if "lengths" in mat_data:
-        cufsm_input["lengths"] = np.array(mat_data["lengths"]).T
+        cufsm_input["lengths"] = np.array(mat_data["lengths"], dtype=np.double).flatten()
     if "prop" in mat_data:
         cufsm_input["props"] = np.array(mat_data["prop"])
     if "constraints" in mat_data:

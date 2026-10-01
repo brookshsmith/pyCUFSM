@@ -134,8 +134,8 @@ def prop2(coord: np.ndarray, ends: np.ndarray) -> Sect_Props:
         x_means[i] = np.mean([coord[start_node, 0], coord[end_node, 0]])
         y_means[i] = np.mean([coord[start_node, 1], coord[end_node, 1]])
         # Compute the dimension of the element
-        x_diffs[i] = np.diff([coord[start_node, 0], coord[end_node, 0]])
-        y_diffs[i] = np.diff([coord[start_node, 1], coord[end_node, 1]])
+        x_diffs[i] = coord[end_node, 0] - coord[start_node, 0]
+        y_diffs[i] = coord[end_node, 1] - coord[start_node, 1]
         # Compute length
         lengths[i] = np.sqrt(x_diffs[i] ** 2 + y_diffs[i] ** 2)
 
@@ -177,8 +177,8 @@ def prop2(coord: np.ndarray, ends: np.ndarray) -> Sect_Props:
         x_means12[i] = np.mean([coord12[start_node, 0], coord12[end_node, 0]])
         y_means12[i] = np.mean([coord12[start_node, 1], coord12[end_node, 1]])
         # Compute the dimension of the element
-        x_diffs12[i] = np.diff([coord12[start_node, 0], coord12[end_node, 0]])
-        y_diffs12[i] = np.diff([coord12[start_node, 1], coord12[end_node, 1]])
+        x_diffs12[i] = coord12[end_node, 0] - coord12[start_node, 0]
+        y_diffs12[i] = coord12[end_node, 1] - coord12[start_node, 1]
 
     # Compute the principal moment of inertia
     I_11 = np.sum((y_diffs12**2 / 12 + (y_means12) ** 2) * lengths * thicknesses)
