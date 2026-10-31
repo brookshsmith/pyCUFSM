@@ -52,7 +52,7 @@ dev = [
     "ipywidgets==8.1.8",
 ]
 test = [
-    "pylint==4.0.2",
+    "pylint==4.0.9",
     "mypy==1.18.2",
     "typing_extensions==4.15.0; python_version<'3.12'",
     "black[jupyter]==26.10.1",
