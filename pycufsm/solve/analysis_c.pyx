@@ -163,7 +163,7 @@ cpdef k_kg_global(
         thick = elements[i, 3]
         b_strip = el_props[i, 1]
         mat_num = int(elements[i, 4])
-        row = int((np.argwhere(props[:, 0] == mat_num)).reshape(1))
+        row = int(np.argwhere(props[:, 0] == mat_num).reshape(1)[0])
         stiff_x = props[row, 1]
         E_y = props[row, 2]
         nu_x = props[row, 3]
@@ -378,7 +378,7 @@ cpdef np.ndarray kglobal_transv(
         thick = elements[i, 3]
         b_strip = el_props[i, 1]
         mat_num = int(elements[i, 4])
-        row = int((np.argwhere(props[:, 0] == mat_num)).reshape(1))
+        row = int(np.argwhere(props[:, 0] == mat_num).reshape(1)[0])
         stiff_x = props[row, 1]
         E_y = props[row, 2]
         nu_x = props[row, 3]
