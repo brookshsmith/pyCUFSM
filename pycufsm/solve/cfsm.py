@@ -606,7 +606,7 @@ def constr_user(nodes: np.ndarray, constraints: np.ndarray, m_a: np.ndarray) -> 
     n_nodes = len(nodes[:, 1])
     n_dof_m = 4 * n_nodes
     dof_reg = np.ones(n_dof_m)
-    r_user_matrix = np.eye(n_dof_m * len(m_a))
+    r_user_matrix = np.zeros((0, 0))
     for i in range(0, len(m_a)):
         #
         r_user_m_matrix = np.eye(n_dof_m)
@@ -631,7 +631,7 @@ def constr_user(nodes: np.ndarray, constraints: np.ndarray, m_a: np.ndarray) -> 
         for j in range(0, len(constraints)):
             if len(constraints[j, :]) >= 5:
                 # nr of eliminated DOF
-                node_e = constraints[j, 0]
+                node_e = int(constraints[j, 0])
                 if constraints[j, 1] == 0:
                     dof_e = node_e * 2 + 1 - 1
                 elif constraints[j, 1] == 2:
@@ -642,7 +642,7 @@ def constr_user(nodes: np.ndarray, constraints: np.ndarray, m_a: np.ndarray) -> 
                     dof_e = n_nodes * 2 + (node_e + 1) * 2 - 1
 
                 # nr of kept DOF
-                node_k = constraints[j, 3]
+                node_k = int(constraints[j, 3])
                 if constraints[j, 4] == 0:
                     dof_k = node_k * 2 + 1 - 1
                 elif constraints[j, 4] == 2:
@@ -658,15 +658,12 @@ def constr_user(nodes: np.ndarray, constraints: np.ndarray, m_a: np.ndarray) -> 
                 r_user_m_matrix[:, dof_k] = r_user_m_matrix[:, dof_k] + constraints[j, 2] * r_user_m_matrix[:, dof_e]
                 dof_reg[dof_e] = 0
 
-        # to eliminate columns from r_user_matrix
-        k = -1
-        r_u_matrix = np.zeros_like(r_user_m_matrix)
-        for j in range(0, n_dof_m):
-            if dof_reg[j] == 1:
-                k = k + 1
-                r_u_matrix[:, k] = r_user_m_matrix[:, j]
-
-        r_user_m_matrix = r_u_matrix[:, 0:k]
+        # to eliminate columns from r_user_matrix: keep one column per remaining free DOF
+        r_user_m_matrix = r_user_m_matrix[:, dof_reg == 1]
+        k = r_user_m_matrix.shape[1]
+        if i == 0:
+            # block diagonal over the longitudinal terms, zero elsewhere (as CUFSM's constr_user.m)
+            r_user_matrix = np.zeros((n_dof_m * len(m_a), k * len(m_a)))
         r_user_matrix[i * n_dof_m : (i + 1) * n_dof_m, i * k : (i + 1) * k] = r_user_m_matrix
 
     return r_user_matrix
