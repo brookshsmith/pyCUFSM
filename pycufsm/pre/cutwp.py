@@ -266,26 +266,28 @@ def prop2(coord: np.ndarray, ends: np.ndarray) -> Sect_Props:
             x_shearcentre = np.float64(0.0)
         if np.abs(y_shearcentre / np.sqrt(area)) < 1e-12:
             y_shearcentre = np.float64(0.0)
-        # Compute unit warping
+        # Compute unit warping about the shear centre. As in the original CUTWP,
+        # this walk uses its own visited-node table (wo_vals), separate from
+        # the one used above for the centroid-based warping (w_vals).
         for _ in range(n_elements):
             i = 0
             while i < len(ends) - 1 and (
-                (np.any(w_vals[:, 0] == ends[i, 0]) and np.any(w_vals[:, 0] == ends[i, 1]))
-                or (not (np.any(w_vals[:, 0] == ends[i, 0])) and (not np.any(w_vals[:, 0] == ends[i, 1])))
+                (np.any(wo_vals[:, 0] == ends[i, 0]) and np.any(wo_vals[:, 0] == ends[i, 1]))
+                or (not (np.any(wo_vals[:, 0] == ends[i, 0])) and (not np.any(wo_vals[:, 0] == ends[i, 1])))
             ):
                 i = i + 1
             start_node = int(ends[i, 0]) - 1
-            end_node = int(ends[i, 0]) - 1
+            end_node = int(ends[i, 1]) - 1
             po_vals = (
                 (coord[start_node, 0] - x_shearcentre) * (coord[end_node, 1] - y_shearcentre)
                 - (coord[end_node, 0] - x_shearcentre) * (coord[start_node, 1] - y_shearcentre)
             ) / lengths[i]
-            if w_vals[start_node, 0] == 0:
-                w_vals[start_node, 0] = start_node + 1
-                w_vals[start_node, 1] = w_vals[end_node, 1] - po_vals * lengths[i]
-            elif w_vals[end_node, 0] == 0:
-                w_vals[end_node, 0] = end_node + 1
-                w_vals[end_node, 1] = w_vals[start_node, 1] + po_vals * lengths[i]
+            if wo_vals[start_node, 0] == 0:
+                wo_vals[start_node, 0] = start_node + 1
+                wo_vals[start_node, 1] = wo_vals[end_node, 1] - po_vals * lengths[i]
+            elif wo_vals[end_node, 0] == 0:
+                wo_vals[end_node, 0] = end_node + 1
+                wo_vals[end_node, 1] = wo_vals[start_node, 1] + po_vals * lengths[i]
             w_no = w_no + 1 / (2 * area) * (wo_vals[start_node, 1] + wo_vals[end_node, 1]) * thicknesses[i] * lengths[i]
         wn_vals: Optional[np.ndarray] = np.zeros((len(wo_vals), 2))
         wn_vals = w_no - wo_vals[:, 1]

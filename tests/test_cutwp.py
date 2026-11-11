@@ -45,3 +45,65 @@ def describe_prop2():
             ends = np.array([[0, 1, 0.1], [2, 3, 0.1], [0, 2, 0.1]], dtype=float)
             sect = cutwp.prop2(coord.copy(), ends.copy())
             assert sect["Ixy"] == approx(0.0)
+
+    def context_warping_constant():
+        # Centreline dimensions shared by the closed-form checks below
+        depth, width, thick = 10.0, 4.0, 0.1
+
+        def _channel():
+            coord = np.array([[width, 0.0], [0.0, 0.0], [0.0, depth], [width, depth]])
+            ends = np.array([[0, 1, thick], [1, 2, thick], [2, 3, thick]], dtype=float)
+            return coord, ends
+
+        def _subdivided(coord: np.ndarray, ends: np.ndarray, parts: int) -> tuple[np.ndarray, np.ndarray]:
+            # Split each element into ``parts`` collinear elements
+            new_coord = [coord[int(ends[0, 0])]]
+            new_ends = []
+            for start, end, t in ends:
+                for k in range(1, parts + 1):
+                    new_coord.append(coord[int(start)] + (coord[int(end)] - coord[int(start)]) * k / parts)
+                    new_ends.append([len(new_coord) - 2, len(new_coord) - 1, t])
+            return np.array(new_coord), np.array(new_ends, dtype=float)
+
+        def it_matches_the_closed_form_value_for_a_plain_channel():
+            # Cw = t b^3 h^2 (3b + 2h) / (12 (6b + h))
+            coord, ends = _channel()
+            sect = cutwp.prop2(coord.copy(), ends.copy())
+            expected = thick * width**3 * depth**2 * (3 * width + 2 * depth) / (12 * (6 * width + depth))
+            assert sect["Cw"] == approx(expected)
+            # the shear centre, computed before Cw, is unaffected: e = 3b^2 / (h + 6b)
+            assert sect["x0"] == approx(-3 * width**2 / (depth + 6 * width))
+
+        def it_matches_the_closed_form_value_for_a_zed():
+            # Point-symmetric section with a non-zero product of inertia:
+            # Cw = t b^3 h^2 (b + 2h) / (12 (2b + h))
+            coord = np.array([[width, 0.0], [0.0, 0.0], [0.0, depth], [-width, depth]])
+            ends = np.array([[0, 1, thick], [1, 2, thick], [2, 3, thick]], dtype=float)
+            sect = cutwp.prop2(coord.copy(), ends.copy())
+            expected = thick * width**3 * depth**2 * (width + 2 * depth) / (12 * (2 * width + depth))
+            assert sect["Cw"] == approx(expected)
+
+        def it_does_not_depend_on_the_element_discretisation():
+            coord, ends = _channel()
+            reference = cutwp.prop2(coord.copy(), ends.copy())["Cw"]
+            fine_coord, fine_ends = _subdivided(coord, ends, parts=5)
+            assert cutwp.prop2(fine_coord.copy(), fine_ends.copy())["Cw"] == approx(reference)
+
+        def it_does_not_depend_on_the_element_order():
+            coord, ends = _channel()
+            reference = cutwp.prop2(coord.copy(), ends.copy())["Cw"]
+            reversed_ends = ends[::-1].copy()
+            assert cutwp.prop2(coord.copy(), reversed_ends)["Cw"] == approx(reference)
+
+        def it_returns_a_normalised_unit_warping():
+            # The normalised unit warping integrates to zero over the section
+            coord, ends = _channel()
+            sect = cutwp.prop2(coord.copy(), ends.copy())
+            wn_vals = sect["wn"]
+            assert wn_vals is not None
+            integral = sum(
+                (wn_vals[int(s)] + wn_vals[int(e)]) / 2 * t * np.hypot(*(coord[int(e)] - coord[int(s)]))
+                for s, e, t in ends
+            )
+            assert integral == approx(0.0, abs=1e-9)
+            assert np.max(np.abs(wn_vals)) > 0
