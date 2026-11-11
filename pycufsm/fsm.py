@@ -140,6 +140,9 @@ def strip(
         shapes (np.ndarray): mode shapes for each length
             | `shapes[length#] = [disp_mode1, disp_mode2, ...]`
             Each `disp_*` is an array of displacements for each node in the section
+
+        Lengths with fewer valid modes than the largest count (or fewer DOF, when
+        `m_all` varies between lengths) are padded with zeros in `curve` and `shapes`.
     """
 
     n_nodes = len(nodes)
@@ -465,11 +468,16 @@ def strip(
         shapes.append(modes_full)
         max_n_modes = max(max_n_modes, n_modes)
 
+    # The number of valid modes can differ between lengths (eigenvalues are
+    # filtered above), and each mode has 4 * n_nodes * total_m DOF, so pad
+    # every length to the largest size found instead of assuming it.
+    max_n_dof = max((shape.shape[0] for shape in shapes), default=4 * len(nodes))
     uniform_curve = np.full((len(lengths), max_n_modes), 0.0)
-    uniform_shapes = np.full((len(lengths), max_n_modes, 4 * len(nodes)), 0.0)
-    for i in range(len(lengths)):
-        uniform_curve[i, :max_n_modes] = curve[i]
-        uniform_shapes[i, :max_n_modes, :] = shapes[i].T
+    uniform_shapes = np.full((len(lengths), max_n_modes, max_n_dof), 0.0)
+    for i, (curve_i, shapes_i) in enumerate(zip(curve, shapes)):
+        n_modes_i = len(curve_i)
+        uniform_curve[i, :n_modes_i] = curve_i
+        uniform_shapes[i, :n_modes_i, : shapes_i.shape[0]] = shapes_i.T
 
     return signature, uniform_curve, uniform_shapes
 
